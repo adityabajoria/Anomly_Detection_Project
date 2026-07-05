@@ -1,0 +1,182 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="d4910ce0-e2ba-48d4-a314-973d297c6e87" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/.idea/Anomly_Detection_Project.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/profiles_settings.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/aggregate.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dashboard/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/dashboard/app.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/OmniAnomaly/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/data/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/evaluation/metrics.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/base.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/models/pca_detector.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/notebooks/smd_exploration.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/run_experiments.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/src/preprocessing.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/__init__.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/tests/test_metrics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data/OmniAnomaly/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/data/OmniAnomaly/omni_main.py" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="EmbeddingIndexingInfo">
+    <option name="cachedIndexableFilesCount" value="139" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Jupyter Notebook" />
+        <option value="Python Script" />
+      </list>
+    </option>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="McpProjectServerCommands">
+    <commands />
+    <urls />
+  </component>
+  <component name="NextEditCompletionFeaturesState">
+    <decayedCancelled>
+      <entry key="MS100" value="1.2142373242563946" />
+      <entry key="MS500" value="2.8271229390706814" />
+      <entry key="S2" value="8.740808290809554" />
+      <entry key="S5" value="13.879795103650435" />
+      <entry key="S10" value="16.568648325539147" />
+      <entry key="S30" value="18.91201975941986" />
+      <entry key="S60" value="20.63220027861714" />
+      <entry key="M2" value="25.016499909777494" />
+      <entry key="M5" value="44.147081654264284" />
+      <entry key="M10" value="86.45197814201079" />
+      <entry key="M15" value="133.61062713665768" />
+      <entry key="M30" value="273.5369894282144" />
+      <entry key="H1" value="487.9111435597971" />
+      <entry key="H2" value="763.5669877794799" />
+      <entry key="H4" value="1079.4190960705014" />
+      <entry key="D1" value="1631.6240497881533" />
+      <entry key="W1" value="1777.5977373152891" />
+    </decayedCancelled>
+    <decayedSelected>
+      <entry key="MS100" value="0.0" />
+      <entry key="MS500" value="0.0" />
+      <entry key="S2" value="5.050121206084336E-232" />
+      <entry key="S5" value="3.0291495885424723E-93" />
+      <entry key="S10" value="5.503771060413546E-47" />
+      <entry key="S30" value="3.804088971148327E-16" />
+      <entry key="S60" value="1.966696656966621E-8" />
+      <entry key="M2" value="1.5255801771521283E-4" />
+      <entry key="M5" value="0.04225299668873908" />
+      <entry key="M10" value="0.36101568640298254" />
+      <entry key="M15" value="0.8379485310509496" />
+      <entry key="M30" value="2.404375418948665" />
+      <entry key="H1" value="5.389562717601319" />
+      <entry key="H2" value="10.05559074518245" />
+      <entry key="H4" value="15.478220954906655" />
+      <entry key="D1" value="24.359687340236416" />
+      <entry key="W1" value="26.59893073192649" />
+    </decayedSelected>
+    <decayedShown>
+      <entry key="MS100" value="1.1730098352084841" />
+      <entry key="MS500" value="2.810067469849649" />
+      <entry key="S2" value="8.728025885348512" />
+      <entry key="S5" value="13.871641174618059" />
+      <entry key="S10" value="16.56377217367396" />
+      <entry key="S30" value="18.90937118200409" />
+      <entry key="S60" value="20.62884798729579" />
+      <entry key="M2" value="25.01317937264711" />
+      <entry key="M5" value="44.1864159658162" />
+      <entry key="M10" value="86.80655781735841" />
+      <entry key="M15" value="134.43715278778237" />
+      <entry key="M30" value="275.92054727856896" />
+      <entry key="H1" value="493.2762977627597" />
+      <entry key="H2" value="773.6003220618251" />
+      <entry key="H4" value="1094.879993630658" />
+      <entry key="D1" value="1655.9789626639397" />
+      <entry key="W1" value="1804.1959134202198" />
+    </decayedShown>
+  </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0,
+  &quot;fromUser&quot;: false
+}</component>
+  <component name="ProjectId" id="3FpwBOeAKWhKTuUPxSmb6P5p0pM" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;Python.preprocessing.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.MCP Project settings loaded&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.TerminalTabsStorage.copyFrom.TerminalArrangementManager.252&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.typescript.service.memoryLimit.init&quot;: &quot;true&quot;,
+    &quot;codeWithMe.voiceChat.enabledByDefault&quot;: &quot;false&quot;,
+    &quot;com.intellij.ml.llm.matterhorn.ej.ui.settings.DefaultModelSelectionForGA.v1&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;,
+    &quot;to.speed.mode.migration.done&quot;: &quot;true&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/models" />
+      <recent name="$PROJECT_DIR$/src" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/data" />
+    </key>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-python-sdk-c59985aa861c-c2ffad84badb-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-261.24374.152" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="d4910ce0-e2ba-48d4-a314-973d297c6e87" name="Changes" comment="" />
+      <created>1782785182818</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1782785182818</updated>
+      <workItem from="1782785183859" duration="2483000" />
+      <workItem from="1782955229747" duration="3498000" />
+      <workItem from="1783028031391" duration="14216000" />
+      <workItem from="1783214440550" duration="7165000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/Anomly_Detection_Project$main.coverage" NAME="main Coverage Results" MODIFIED="1783032024501" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/Anomly_Detection_Project$preprocessing.coverage" NAME="preprocessing Coverage Results" MODIFIED="1783032019264" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="false" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/src" />
+  </component>
+</project>
