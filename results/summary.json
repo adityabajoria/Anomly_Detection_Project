@@ -1,0 +1,12 @@
+{
+  "pca": {
+    "n_machines": 28,
+    "honest_f1_mean": 0.4487455090678119,
+    "honest_f1_std": 0.22643050151799932,
+    "adjusted_f1_mean": 0.7140314291087703,
+    "adjusted_f1_std": 0.22363947628941047,
+    "pr_auc_mean": 0.3782549831696362,
+    "pr_auc_std": 0.24753288039392665,
+    "throughput_median": 4274265.0
+  }
+}

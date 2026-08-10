@@ -1,0 +1,11 @@
+defaults:
+  - _self_
+
+data_dir: /Users/aditya/PycharmProjects/Anomly_Detection_Project/data/OmniAnomaly/ServerMachineDataset
+
+detectors:
+  -pca
+
+machines: all
+
+results_dir: results
