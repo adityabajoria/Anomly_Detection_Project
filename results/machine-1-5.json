@@ -1,0 +1,39 @@
+{
+  "pca": {
+    "pr_auc": 0.40252303684050905,
+    "threshold": 241.6281303152112,
+    "honest": {
+      "precision": 0.5053763440860215,
+      "recall": 0.47,
+      "f1": 0.48704663212435234,
+      "confusion_matrix": [
+        [
+          23560,
+          46
+        ],
+        [
+          53,
+          47
+        ]
+      ]
+    },
+    "point_adjusted": {
+      "precision": 0.5660377358490566,
+      "recall": 0.6,
+      "f1": 0.5825242718446602,
+      "confusion_matrix": [
+        [
+          23560,
+          46
+        ],
+        [
+          40,
+          60
+        ]
+      ]
+    },
+    "fit_seconds": 0.0066,
+    "score_seconds": 0.0048,
+    "throughput_pts_per_sec": 4953067
+  }
+}

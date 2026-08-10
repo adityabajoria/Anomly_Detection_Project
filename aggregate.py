@@ -10,7 +10,7 @@ RESULTS_DIR = Path("results")
 def main():
     # collect metric lists per detector across all machines
     per_detector = defaultdict(lambda: defaultdict(list))
-    machine_files = sorted(RESULTS_DIR.glob("*.json"))
+    machine_files = sorted(RESULTS_DIR.glob("machine-*.json"))
 
     for path in machine_files:
         with open(path) as f:

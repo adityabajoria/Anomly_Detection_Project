@@ -1,0 +1,20 @@
+# Virtual environment
+.venv/
+venv/
+
+# Hydra run logs
+outputs/
+
+# Dataset (downloaded separately)
+data/
+
+# Python caches
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# IDE
+.idea/
+
+# OS
+.DS_Store
