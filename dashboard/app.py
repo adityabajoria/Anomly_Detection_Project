@@ -8,7 +8,7 @@ sys.path.append(str(PROJECT_ROOT))
 
 import numpy as np
 import plotly.graph_objects as go
-from dash import Dash, html, dcc, Input, Output
+from dash import Dash, html, dcc, Input, Output, State, no_update
 import dash_bootstrap_components as dbc
 
 RESULTS_DIR = PROJECT_ROOT / "results"
@@ -40,10 +40,7 @@ MAIN_STYLE = {"backgroundColor": "#030712", "minHeight": "100vh", "padding": "32
 MUTED = {"color": "#9ca3af"}
 
 
-# ---------- data access (reads what run_experiments.py saved) ----------
-
 def machine_sort_key(name):
-    # "machine-1-10" -> (1, 10) so machines sort numerically, not alphabetically
     nums = re.findall(r"\d+", name)
     return tuple(int(n) for n in nums) if nums else (0,)
 
@@ -64,7 +61,6 @@ def load_scores(machine_id, model):
 
 
 def find_segments(binary):
-    # contiguous runs of 1s -> list of (start, end)
     segs, in_seg, start = [], False, 0
     for i, v in enumerate(binary):
         if v == 1 and not in_seg:
@@ -74,8 +70,6 @@ def find_segments(binary):
             in_seg = False
     return segs
 
-
-# ---------- figure ----------
 
 def build_timeline(scores, labels, threshold):
     fig = go.Figure()
@@ -100,7 +94,32 @@ def build_timeline(scores, labels, threshold):
     return fig
 
 
-# ---------- layout pieces ----------
+def build_replay_timeline(scores, labels, threshold, frame):
+    fig = go.Figure()
+    for start, end in find_segments(labels):
+        fig.add_vrect(x0=start, x1=end, fillcolor="#ef4444", opacity=0.18, line_width=0)
+    visible = scores[:frame]
+    fig.add_trace(go.Scattergl(
+        y=visible, mode="lines", name="anomaly score",
+        line={"color": "#38bdf8", "width": 1},
+    ))
+    alarm_idx = np.where(visible >= threshold)[0]
+    if len(alarm_idx) > 0:
+        fig.add_trace(go.Scattergl(
+            x=alarm_idx, y=visible[alarm_idx], mode="markers",
+            marker={"color": "#ef4444", "size": 6}, name="alarm",
+        ))
+    fig.add_hline(y=threshold, line_dash="dash", line_color="#f59e0b")
+    fig.update_layout(
+        template="plotly_dark",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin={"l": 50, "r": 20, "t": 20, "b": 40}, height=360,
+        xaxis={"title": "timestep", "range": [0, len(scores)]},
+        yaxis={"title": "anomaly score", "range": [0, float(scores.max()) * 1.05]},
+        showlegend=False,
+    )
+    return fig
+
 
 def kpi_card(title, value_id):
     return dbc.Col(dbc.Card(dbc.CardBody([
@@ -116,7 +135,6 @@ def sidebar():
             html.H2("Sentinel", style={"fontWeight": "700"}),
             html.P("Machine health monitoring", style={**MUTED, "fontSize": "14px"}),
             html.Hr(style={"borderColor": "#1f2937"}),
-
             html.Label("Machine", style={"fontWeight": "600"}),
             dcc.Dropdown(
                 id="machine-dropdown",
@@ -126,10 +144,8 @@ def sidebar():
                 style={"color": "#111827"},
             ),
             html.Br(),
-
             html.Label("Model", style={"fontWeight": "600"}),
             dcc.Dropdown(id="model-dropdown", clearable=False, style={"color": "#111827"}),
-
             html.Div(
                 [
                     html.H6("About", style=MUTED),
@@ -154,7 +170,6 @@ def main_column():
             html.H1("Sentinel", style={"fontWeight": "800", "marginBottom": "4px"}),
             html.P("Anomaly detection for multivariate server telemetry.",
                    style={**MUTED, "marginBottom": "24px"}),
-
             dbc.Row(
                 [
                     kpi_card("Honest F1", "kpi-honest-f1"),
@@ -164,7 +179,6 @@ def main_column():
                 ],
                 className="mb-4 g-3",
             ),
-
             dbc.Row(
                 [
                     dbc.Col(
@@ -174,6 +188,13 @@ def main_column():
                                 html.P("Score per timestep. Shaded regions are true "
                                        "anomalies; dashed line is the decision threshold.",
                                        style=MUTED),
+                                html.Div([
+                                    dbc.Button("Play", id="play-btn", color="primary",
+                                               size="sm", className="me-3"),
+                                    html.Span(id="replay-progress", style=MUTED),
+                                ], style={"marginBottom": "12px"}),
+                                dcc.Interval(id="replay-interval", interval=80, disabled=True),
+                                dcc.Store(id="replay-frame", data=0),
                                 dcc.Graph(id="timeline-graph", config={"displayModeBar": False}),
                             ],
                             style=CARD_STYLE,
@@ -193,7 +214,6 @@ def main_column():
                 ],
                 className="mb-4 g-3",
             ),
-
             dbc.Row(
                 [
                     dbc.Col(
@@ -233,8 +253,6 @@ app.layout = html.Div(
 )
 
 
-# ---------- callbacks ----------
-
 @app.callback(
     Output("model-dropdown", "options"),
     Output("model-dropdown", "value"),
@@ -246,6 +264,41 @@ def update_model_options(machine_id):
     models = list(load_results(machine_id).keys())
     options = [{"label": MODEL_LABELS.get(m, m), "value": m} for m in models]
     return options, models[0]
+
+
+@app.callback(
+    Output("replay-interval", "disabled"),
+    Output("play-btn", "children"),
+    Input("play-btn", "n_clicks"),
+    State("replay-interval", "disabled"),
+    prevent_initial_call=True,
+)
+def toggle_play(n_clicks, currently_disabled):
+    now_playing = currently_disabled
+    label = "Pause" if now_playing else "Play"
+    return (not now_playing), label
+
+
+@app.callback(
+    Output("timeline-graph", "figure", allow_duplicate=True),
+    Output("replay-frame", "data"),
+    Output("replay-progress", "children"),
+    Input("replay-interval", "n_intervals"),
+    State("replay-frame", "data"),
+    State("machine-dropdown", "value"),
+    State("model-dropdown", "value"),
+    prevent_initial_call=True,
+)
+def advance_replay(n_intervals, frame, machine_id, model):
+    if not machine_id or not model:
+        return no_update, no_update, no_update
+    scores, labels, threshold = load_scores(machine_id, model)
+    frame = (frame or 0) + 40
+    if frame >= len(scores):
+        frame = len(scores)
+    fig = build_replay_timeline(scores, labels, threshold, frame)
+    progress = f"t = {frame:,} / {len(scores):,}"
+    return fig, frame, progress
 
 
 @app.callback(
@@ -264,31 +317,16 @@ def update_view(machine_id, model):
     if not machine_id or not model:
         empty = go.Figure()
         return empty, "-", "-", "-", "-", None, None, None
-
     result = load_results(machine_id)[model]
-
     try:
         scores, labels, threshold = load_scores(machine_id, model)
     except FileNotFoundError:
         scores = None
-
     if scores is None:
         fig = go.Figure()
-        fig.update_layout(
-            template="plotly_dark",
-            paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
-            height=360,
-            annotations=[{
-                "text": "No score file found - rerun: python run_experiments.py --all",
-                "showarrow": False, "font": {"color": "#9ca3af", "size": 14},
-            }],
-            xaxis={"visible": False}, yaxis={"visible": False},
-        )
     else:
         fig = build_timeline(scores, labels, threshold)
-
     honest, adjusted = result["honest"], result["point_adjusted"]
-
     table = dbc.Table(
         [
             html.Thead(html.Tr([html.Th(""), html.Th("Honest"), html.Th("Point-Adjusted")])),
@@ -303,37 +341,21 @@ def update_view(machine_id, model):
         ],
         bordered=False, color="dark", size="sm", className="mb-0",
     )
-
-    if scores is None:
-        msg = html.P("Score file missing for this machine/model.", style=MUTED)
-        return (fig, f"{honest['f1']:.3f}", f"{adjusted['f1']:.3f}",
-                f"{result['pr_auc']:.3f}", f"{result['throughput_pts_per_sec']:,}",
-                table, msg, msg)
-
     pred = (scores >= threshold).astype(int)
     true_segs = find_segments(labels)
     pred_segs = find_segments(pred)
     caught = sum(1 for s, e in true_segs if pred[s:e].any())
-
     status = html.Div([
         html.Div(f"{caught} / {len(true_segs)}",
                  style={"fontSize": "42px", "fontWeight": "800", "color": "#22c55e"}),
         html.P("true anomaly segments detected", style=MUTED),
-        html.P(f"{len(pred_segs)} alert regions raised · "
-               f"{int(pred.sum()):,} flagged timesteps", style=MUTED),
     ])
-
     ranked = sorted(pred_segs, key=lambda s: float(scores[s[0]:s[1]].max()), reverse=True)[:5]
-    if ranked:
-        alerts = html.Ul(
-            [html.Li(f"t = {s:,} - {e:,}  ·  peak score {scores[s:e].max():.2f}",
-                     style={"marginBottom": "6px"})
-             for s, e in ranked],
-            style={"paddingLeft": "20px"},
-        )
-    else:
-        alerts = html.P("No alerts at the current threshold.", style=MUTED)
-
+    alerts = html.Ul(
+        [html.Li(f"t = {s:,} - {e:,}  peak score {scores[s:e].max():.2f}")
+         for s, e in ranked],
+        style={"paddingLeft": "20px"},
+    ) if ranked else html.P("No alerts.", style=MUTED)
     return (fig, f"{honest['f1']:.3f}", f"{adjusted['f1']:.3f}",
             f"{result['pr_auc']:.3f}", f"{result['throughput_pts_per_sec']:,}",
             table, status, alerts)

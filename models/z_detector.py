@@ -25,5 +25,14 @@ class ZScoreDetector(BaseDetector):
             return z.max(axis=1)
         return z.mean(axis=1)
 
+    def score_one(self, x):
+        if self.mean is None:
+            raise RuntimeError("Call fit( before score_one().")
+        x = np.asarray(x, dtype=float)
+        z = np.abs((x - self.mean) / self.std)
+        if self.aggregation == "max":
+            return float(z.max())
+        return float(z.mean())
+
     def get_params(self):
         return {"aggregation": self.aggregation}
