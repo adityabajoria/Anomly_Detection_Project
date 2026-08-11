@@ -33,7 +33,44 @@
       ]
     },
     "fit_seconds": 0.0063,
-    "score_seconds": 0.0061,
-    "throughput_pts_per_sec": 3858958
+    "score_seconds": 0.0059,
+    "throughput_pts_per_sec": 3987742
+  },
+  "zscore": {
+    "pr_auc": 0.2196427737685145,
+    "threshold": 15.318596828018345,
+    "honest": {
+      "precision": 0.44562334217506633,
+      "recall": 0.30996309963099633,
+      "f1": 0.36561479869423286,
+      "confusion_matrix": [
+        [
+          22943,
+          209
+        ],
+        [
+          374,
+          168
+        ]
+      ]
+    },
+    "point_adjusted": {
+      "precision": 0.6921944035346097,
+      "recall": 0.8671586715867159,
+      "f1": 0.7698607698607699,
+      "confusion_matrix": [
+        [
+          22943,
+          209
+        ],
+        [
+          72,
+          470
+        ]
+      ]
+    },
+    "fit_seconds": 0.0017,
+    "score_seconds": 0.0013,
+    "throughput_pts_per_sec": 17888447
   }
 }

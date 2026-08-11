@@ -4,7 +4,8 @@ defaults:
 data_dir: /Users/aditya/PycharmProjects/Anomly_Detection_Project/data/OmniAnomaly/ServerMachineDataset
 
 detectors:
-  -pca
+  - pca
+  - zscore
 
 machines: all
 

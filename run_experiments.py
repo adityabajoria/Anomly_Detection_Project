@@ -5,6 +5,7 @@ import numpy as np
 from pathlib import Path
 from src.data_loader import get_machine_ids, load_machine
 from models.pca_detector import PCADetector
+from models.z_detector import ZScoreDetector
 from evaluation.metrics import evaluate_detector
 from omegaconf import DictConfig
 
@@ -13,8 +14,8 @@ def get_detectors():
     """Registry of detectors to run. Add new detectors here."""
     return [
         PCADetector(),
-        # ZScoreDetector(),        <- next up
-        # IForestDetector(),
+        ZScoreDetector(),
+        # IForestDetector(), # next up
         # LSTMAEDetector(),
     ]
 
