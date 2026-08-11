@@ -32,9 +32,9 @@
         ]
       ]
     },
-    "fit_seconds": 0.0066,
-    "score_seconds": 0.0047,
-    "throughput_pts_per_sec": 5086232
+    "fit_seconds": 0.0052,
+    "score_seconds": 0.0043,
+    "throughput_pts_per_sec": 5461440
   },
   "zscore": {
     "pr_auc": 0.18531111201896366,
@@ -69,8 +69,8 @@
         ]
       ]
     },
-    "fit_seconds": 0.002,
-    "score_seconds": 0.0016,
-    "throughput_pts_per_sec": 14632700
+    "fit_seconds": 0.0014,
+    "score_seconds": 0.001,
+    "throughput_pts_per_sec": 22653827
   }
 }

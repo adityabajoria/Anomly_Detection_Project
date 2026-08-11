@@ -2,12 +2,15 @@ import hydra
 import json
 import time
 import numpy as np
+import mlflow
 from pathlib import Path
 from src.data_loader import get_machine_ids, load_machine
 from models.pca_detector import PCADetector
 from models.z_detector import ZScoreDetector
 from evaluation.metrics import evaluate_detector
 from omegaconf import DictConfig
+
+mlflow.set_experiment("sentinel-benchmark")
 
 
 def get_detectors():
@@ -41,6 +44,14 @@ def run_machine(machine_id, cfg):
         result["throughput_pts_per_sec"] = round(len(test) / max(score_seconds, 1e-9))
 
         machine_results[det.name] = result
+
+        with mlflow.start_run(run_name=f"{machine_id}-{det.name}"):
+            mlflow.log_param("detector", det.name)
+            mlflow.log_param("machine", machine_id)
+            mlflow.log_params(det.get_params())
+            mlflow.log_metric("honest_f1", result["honest"]["f1"])
+            mlflow.log_metric("adjusted_f1", result["point_adjusted"]["f1"])
+            mlflow.log_metric("pr_auc", result["pr_auc"])
 
         scores_dir.mkdir(parents=True, exist_ok=True)
         np.savez_compressed(
