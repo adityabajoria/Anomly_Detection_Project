@@ -43,6 +43,38 @@ def point_adjust(y_true, y_pred):
             in_seg = False
     return y_pred
 
+def find_segments(labels):
+    segments = []
+    start = None
+    for i, val in enumerate(labels):
+        if val == 1 and start is None:
+            start = i
+        elif val == 0 and start is not None:
+            segments.append((start, i - 1))
+            start = None
+    if start is not None:
+        segments.append((start, len(labels) - 1))
+    return segments
+
+
+def detection_delay(labels, predictions):
+    labels = np.asarray(labels).ravel()
+    predictions = np.asarray(predictions).ravel()
+    segments = find_segments(labels)
+
+    delays = []
+    for start, end in segments:
+        seg_preds = predictions[start:end + 1]
+        flagged = np.where(seg_preds == 1)[0]
+        if len(flagged) > 0:
+            delays.append(int(flagged[0]))
+
+    return {
+        "mean_delay": float(np.mean(delays)) if delays else None,
+        "segments_detected": len(delays),
+        "segments_total": len(segments),
+    }
+
 def evaluate_detector(y_true, scores):
     y_true = np.asarray(y_true)
     scores = np.asarray(scores)
@@ -52,12 +84,14 @@ def evaluate_detector(y_true, scores):
 
     honest = evaluate_predictions(y_true, y_pred)
     adjusted = evaluate_predictions(y_true, point_adjust(y_true, y_pred))
+    delay = detection_delay(y_true, y_pred)
 
     return {
         "pr_auc": sweep["pr_auc"],
         "threshold": sweep["threshold"],
         "honest": honest,
-        "point_adjusted": adjusted
+        "point_adjusted": adjusted,
+        "detection_delay": delay
     }
 
 

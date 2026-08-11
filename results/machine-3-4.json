@@ -32,9 +32,14 @@
         ]
       ]
     },
-    "fit_seconds": 0.0071,
-    "score_seconds": 0.0075,
-    "throughput_pts_per_sec": 3166129
+    "detection_delay": {
+      "mean_delay": 46.75,
+      "segments_detected": 8,
+      "segments_total": 8
+    },
+    "fit_seconds": 0.0067,
+    "score_seconds": 0.0048,
+    "throughput_pts_per_sec": 4896031
   },
   "zscore": {
     "pr_auc": 0.7975794129121748,
@@ -69,8 +74,13 @@
         ]
       ]
     },
-    "fit_seconds": 0.0028,
-    "score_seconds": 0.0019,
-    "throughput_pts_per_sec": 12186501
+    "detection_delay": {
+      "mean_delay": 3.0,
+      "segments_detected": 3,
+      "segments_total": 8
+    },
+    "fit_seconds": 0.0015,
+    "score_seconds": 0.0012,
+    "throughput_pts_per_sec": 20319107
   }
 }

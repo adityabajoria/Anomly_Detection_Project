@@ -8,6 +8,7 @@ from src.data_loader import get_machine_ids, load_machine
 from models.pca_detector import PCADetector
 from models.z_detector import ZScoreDetector
 from evaluation.metrics import evaluate_detector
+from evaluation.metrics import detection_delay
 from omegaconf import DictConfig
 
 mlflow.set_experiment("sentinel-benchmark")
@@ -52,6 +53,9 @@ def run_machine(machine_id, cfg):
             mlflow.log_metric("honest_f1", result["honest"]["f1"])
             mlflow.log_metric("adjusted_f1", result["point_adjusted"]["f1"])
             mlflow.log_metric("pr_auc", result["pr_auc"])
+            mlflow.log_metric("mean_delay", result["detection_delay"]["mean_delay"] or -1)
+            mlflow.log_metric("segments_detected", result["detection_delay"]["segments_detected"])
+            mlflow.log_metric("segments_total", result["detection_delay"]["segments_total"])
 
         scores_dir.mkdir(parents=True, exist_ok=True)
         np.savez_compressed(
@@ -74,6 +78,9 @@ def run_machine(machine_id, cfg):
 
     return machine_results
 
+labels = [0, 0, 1, 1, 1, 0, 0, 1, 1, 0]
+preds = [0, 0, 0, 1, 0, 0, 0, 0, 1 , 0]
+print(detection_delay(labels, preds))
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):
