@@ -5,10 +5,14 @@ import numpy as np
 import mlflow
 from pathlib import Path
 from src.data_loader import get_machine_ids, load_machine
-from models.pca_detector import PCADetector
-from models.z_detector import ZScoreDetector
+from detector.pca_detector import PCADetector
+from detector.z_detector import ZScoreDetector
+from detector.random_detector import RandomDetector
+from detector.lstm_autoencoder import LSTMAutoencoderDetector
+from detector.iforest_detector import IForestDetector
 from evaluation.metrics import evaluate_detector
 from evaluation.metrics import detection_delay
+from serving.persistence import save_detector
 from omegaconf import DictConfig
 
 mlflow.set_experiment("sentinel-benchmark")
@@ -17,10 +21,11 @@ mlflow.set_experiment("sentinel-benchmark")
 def get_detectors():
     """Registry of detectors to run. Add new detectors here."""
     return [
-        PCADetector(),
+        RandomDetector(),
         ZScoreDetector(),
-        # IForestDetector(), # next up
-        # LSTMAEDetector(),
+        PCADetector(),
+        IForestDetector(),
+        LSTMAutoencoderDetector()
     ]
 
 
@@ -34,6 +39,7 @@ def run_machine(machine_id, cfg):
         t0 = time.perf_counter()
         det.fit(train)
         fit_seconds = time.perf_counter() - t0
+        save_detector(det, Path(cfg.results_dir).parent / "artifacts" / machine_id / det.name)
 
         t0 = time.perf_counter()
         scores = det.score(test)
@@ -70,6 +76,9 @@ def run_machine(machine_id, cfg):
         print(f"  {det.name:12s}  honest F1={h:.3f}  adjusted F1={a:.3f}  "
               f"PR-AUC={result['pr_auc']:.3f}  ({result['throughput_pts_per_sec']:,} pts/s)")
 
+
+    np.savez_compressed(scores_dir / f"{machine_id}_test.npz", test=test, labels=labels)
+
     out_path = results_dir / f"{machine_id}.json"
     out_path.parent.mkdir(exist_ok=True)
     with open(out_path, "w") as f:
@@ -77,10 +86,6 @@ def run_machine(machine_id, cfg):
     print(f"  saved -> {out_path}")
 
     return machine_results
-
-labels = [0, 0, 1, 1, 1, 0, 0, 1, 1, 0]
-preds = [0, 0, 0, 1, 0, 0, 0, 0, 1 , 0]
-print(detection_delay(labels, preds))
 
 @hydra.main(version_base=None, config_path="conf", config_name="config")
 def main(cfg: DictConfig):

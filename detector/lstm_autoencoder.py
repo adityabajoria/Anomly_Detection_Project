@@ -2,7 +2,7 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, TensorDataset
-from models.base import BaseDetector
+from detector.base import BaseDetector
 import copy
 
 
@@ -74,6 +74,8 @@ class LSTMAutoencoderDetector(BaseDetector):
 
         train = np.asarray(train, dtype=np.float32)
         windows = self._make_windows(train)
+
+        self._n_features = windows.shape[1]
 
         # Last 15% used for validation
         split = int(len(windows) * 0.85)

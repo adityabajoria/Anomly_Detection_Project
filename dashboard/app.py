@@ -14,19 +14,23 @@ import dash_bootstrap_components as dbc
 RESULTS_DIR = PROJECT_ROOT / "results"
 SCORES_DIR = RESULTS_DIR / "scores"
 
+# Keys MUST match each detector's .name attribute exactly.
 MODEL_LABELS = {
+    "random": "Random (baseline)",
     "zscore": "Z-Score",
     "pca": "PCA",
     "iforest": "Isolation Forest",
-    "lstm_ae": "LSTM Autoencoder",
+    "lstm_autoencoder": "LSTM Autoencoder",
 }
+
+# Floor-to-sophisticated order for the comparison view.
+MODEL_ORDER = ["random", "zscore", "pca", "iforest", "lstm_autoencoder"]
 
 CARD_STYLE = {
     "backgroundColor": "#111827",
     "border": "1px solid #1f2937",
     "borderRadius": "16px",
     "padding": "20px",
-    "height": "100%",
 }
 
 SIDEBAR_STYLE = {
@@ -60,6 +64,42 @@ def load_scores(machine_id, model):
     return data["scores"], data["labels"], float(data["threshold"])
 
 
+def aggregate_fleet():
+    """Aggregate per-machine JSONs into fleet-level per-detector means.
+
+    Reads every machine-*.json and averages honest F1, point-adjusted F1, and
+    the inflation gap across all machines. No dependency on aggregate.py, so the
+    view works the moment run_experiments.py finishes.
+    """
+    per_detector = {}
+    for p in RESULTS_DIR.glob("machine-*.json"):
+        data = json.loads(p.read_text())
+        for det, res in data.items():
+            h = res["honest"]["f1"]
+            a = res["point_adjusted"]["f1"]
+            per_detector.setdefault(det, {"honest": [], "adjusted": []})
+            per_detector[det]["honest"].append(h)
+            per_detector[det]["adjusted"].append(a)
+
+    rows = []
+    for det, vals in per_detector.items():
+        honest = np.array(vals["honest"])
+        adjusted = np.array(vals["adjusted"])
+        rows.append({
+            "detector": det,
+            "honest_mean": float(honest.mean()),
+            "honest_std": float(honest.std()),
+            "adjusted_mean": float(adjusted.mean()),
+            "adjusted_std": float(adjusted.std()),
+            "inflation": float((adjusted - honest).mean()),
+            "n": len(honest),
+        })
+    # order floor-to-sophisticated; unknown detectors fall to the end
+    rows.sort(key=lambda r: MODEL_ORDER.index(r["detector"])
+              if r["detector"] in MODEL_ORDER else len(MODEL_ORDER))
+    return rows
+
+
 def find_segments(binary):
     segs, in_seg, start = [], False, 0
     for i, v in enumerate(binary):
@@ -69,6 +109,55 @@ def find_segments(binary):
             segs.append((start, i if v == 0 else i + 1))
             in_seg = False
     return segs
+
+
+def build_inflation_chart(rows):
+    """Grouped bar chart: honest vs point-adjusted F1 per detector."""
+    labels = [MODEL_LABELS.get(r["detector"], r["detector"]) for r in rows]
+    honest = [r["honest_mean"] for r in rows]
+    adjusted = [r["adjusted_mean"] for r in rows]
+    fig = go.Figure()
+    fig.add_trace(go.Bar(
+        x=labels, y=honest, name="Honest F1",
+        marker_color="#38bdf8",
+        error_y={"type": "data", "array": [r["honest_std"] for r in rows], "visible": True,
+                 "color": "#1e3a5f", "thickness": 1},
+    ))
+    fig.add_trace(go.Bar(
+        x=labels, y=adjusted, name="Point-Adjusted F1",
+        marker_color="#f59e0b",
+        error_y={"type": "data", "array": [r["adjusted_std"] for r in rows], "visible": True,
+                 "color": "#78350f", "thickness": 1},
+    ))
+    fig.update_layout(
+        template="plotly_dark",
+        barmode="group",
+        paper_bgcolor="rgba(0,0,0,0)", plot_bgcolor="rgba(0,0,0,0)",
+        margin={"l": 50, "r": 20, "t": 20, "b": 60},
+        height=380,
+        yaxis={"title": "F1 (fleet mean)", "range": [0, 1]},
+        legend={"orientation": "h", "y": 1.12, "x": 0},
+    )
+    return fig
+
+
+def build_inflation_table(rows):
+    header = html.Thead(html.Tr([
+        html.Th("Detector"), html.Th("Honest F1"),
+        html.Th("Point-Adjusted F1"), html.Th("Inflation"),
+    ]))
+    body_rows = []
+    for r in rows:
+        infl = r["inflation"]
+        infl_color = "#ef4444" if infl > 0.15 else "#f59e0b" if infl > 0.05 else "#9ca3af"
+        body_rows.append(html.Tr([
+            html.Td(MODEL_LABELS.get(r["detector"], r["detector"])),
+            html.Td(f"{r['honest_mean']:.3f} ± {r['honest_std']:.3f}"),
+            html.Td(f"{r['adjusted_mean']:.3f} ± {r['adjusted_std']:.3f}"),
+            html.Td(f"+{infl:.3f}", style={"color": infl_color, "fontWeight": "700"}),
+        ]))
+    return dbc.Table([header, html.Tbody(body_rows)],
+                     bordered=False, color="dark", size="sm", className="mb-0")
 
 
 def build_timeline(scores, labels, threshold):
@@ -164,12 +253,54 @@ def sidebar():
     )
 
 
+def thesis_banner():
+    return html.Div(
+        [
+            html.H4("The point-adjustment problem", style={"fontWeight": "700", "marginBottom": "6px"}),
+            html.P(
+                "The field's standard \"point-adjusted\" metric counts an entire anomaly "
+                "segment as detected if a detector flags even one point inside it. Sentinel "
+                "scores every detector both ways \u2014 honestly (point-wise) and point-adjusted "
+                "\u2014 to measure how much the convention inflates reported performance. Watch "
+                "the Random baseline: it has no skill, yet point-adjustment still rewards it.",
+                style={**MUTED, "fontSize": "14px", "marginBottom": "0"},
+            ),
+        ],
+        style={**CARD_STYLE, "marginBottom": "24px", "borderLeft": "3px solid #f59e0b"},
+    )
+
+
+def inflation_section():
+    rows = aggregate_fleet()
+    n = rows[0]["n"] if rows else 0
+    return html.Div(
+        [
+            html.H4("Cross-Detector Inflation", style={"fontWeight": "700", "marginBottom": "4px"}),
+            html.P(f"Honest vs. point-adjusted F1, averaged across {n} machines. "
+                   "The gap is the inflation the metric introduces.",
+                   style={**MUTED, "marginBottom": "16px"}),
+            dbc.Row(
+                [
+                    dbc.Col(dcc.Graph(figure=build_inflation_chart(rows),
+                                      config={"displayModeBar": False}), width=7),
+                    dbc.Col(build_inflation_table(rows), width=5),
+                ],
+                className="g-3",
+            ),
+        ],
+        style={**CARD_STYLE, "marginBottom": "24px"},
+    )
+
+
 def main_column():
     return dbc.Col(
         [
             html.H1("Sentinel", style={"fontWeight": "800", "marginBottom": "4px"}),
             html.P("Anomaly detection for multivariate server telemetry.",
                    style={**MUTED, "marginBottom": "24px"}),
+            thesis_banner(),
+            inflation_section(),
+            html.H4("Per-Machine Inspection", style={"fontWeight": "700", "marginBottom": "16px"}),
             dbc.Row(
                 [
                     kpi_card("Honest F1", "kpi-honest-f1"),
@@ -245,7 +376,10 @@ def main_column():
     )
 
 
-app = Dash(__name__, external_stylesheets=[dbc.themes.DARKLY])
+app = Dash(__name__, external_stylesheets=[
+    dbc.themes.DARKLY,
+    "https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap",
+])
 app.layout = html.Div(
     style={"backgroundColor": "#030712", "color": "#f9fafb",
            "fontFamily": "Inter, sans-serif"},
@@ -262,6 +396,8 @@ def update_model_options(machine_id):
     if machine_id is None:
         return [], None
     models = list(load_results(machine_id).keys())
+    # present in floor-to-sophisticated order when known
+    models.sort(key=lambda m: MODEL_ORDER.index(m) if m in MODEL_ORDER else len(MODEL_ORDER))
     options = [{"label": MODEL_LABELS.get(m, m), "value": m} for m in models]
     return options, models[0]
 
@@ -341,21 +477,25 @@ def update_view(machine_id, model):
         ],
         bordered=False, color="dark", size="sm", className="mb-0",
     )
-    pred = (scores >= threshold).astype(int)
-    true_segs = find_segments(labels)
-    pred_segs = find_segments(pred)
-    caught = sum(1 for s, e in true_segs if pred[s:e].any())
-    status = html.Div([
-        html.Div(f"{caught} / {len(true_segs)}",
-                 style={"fontSize": "42px", "fontWeight": "800", "color": "#22c55e"}),
-        html.P("true anomaly segments detected", style=MUTED),
-    ])
-    ranked = sorted(pred_segs, key=lambda s: float(scores[s[0]:s[1]].max()), reverse=True)[:5]
-    alerts = html.Ul(
-        [html.Li(f"t = {s:,} - {e:,}  peak score {scores[s:e].max():.2f}")
-         for s, e in ranked],
-        style={"paddingLeft": "20px"},
-    ) if ranked else html.P("No alerts.", style=MUTED)
+    if scores is None:
+        status = html.P("Score file not found.", style=MUTED)
+        alerts = html.P("No alerts.", style=MUTED)
+    else:
+        pred = (scores >= threshold).astype(int)
+        true_segs = find_segments(labels)
+        pred_segs = find_segments(pred)
+        caught = sum(1 for s, e in true_segs if pred[s:e].any())
+        status = html.Div([
+            html.Div(f"{caught} / {len(true_segs)}",
+                     style={"fontSize": "42px", "fontWeight": "800", "color": "#22c55e"}),
+            html.P("true anomaly segments detected", style=MUTED),
+        ])
+        ranked = sorted(pred_segs, key=lambda s: float(scores[s[0]:s[1]].max()), reverse=True)[:5]
+        alerts = html.Ul(
+            [html.Li(f"t = {s:,} - {e:,}  peak score {scores[s:e].max():.2f}")
+             for s, e in ranked],
+            style={"paddingLeft": "20px"},
+        ) if ranked else html.P("No alerts.", style=MUTED)
     return (fig, f"{honest['f1']:.3f}", f"{adjusted['f1']:.3f}",
             f"{result['pr_auc']:.3f}", f"{result['throughput_pts_per_sec']:,}",
             table, status, alerts)

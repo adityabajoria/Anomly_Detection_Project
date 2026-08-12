@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sentinel</title>
+<script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<style>
+  :root{--bg:#030712;--card:#0d1526;--border:#1e293b;--text:#f1f5f9;--muted:#94a3b8;
+    --blue:#38bdf8;--amber:#f59e0b;--green:#22c55e;--red:#ef4444;--accent:#6366f1;}
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:Inter,system-ui,-apple-system,sans-serif;padding:32px 40px;}
+  .head{display:flex;align-items:baseline;gap:16px;margin-bottom:4px;}
+  h1{font-weight:800;font-size:32px;margin:0;letter-spacing:-0.02em;}
+  .sub{color:var(--muted);font-size:15px;margin:0 0 28px;}
+  .toprow{display:flex;gap:20px;align-items:center;margin-bottom:24px;flex-wrap:wrap;}
+  select{background:#111c30;color:var(--text);border:1px solid var(--border);
+    border-radius:10px;padding:9px 14px;font-size:14px;font-family:inherit;}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+  .tab{background:var(--card);border:1px solid var(--border);color:var(--muted);
+    border-radius:12px;padding:10px 18px;font-size:14px;font-weight:600;cursor:pointer;
+    transition:all .15s ease;user-select:none;}
+  .tab:hover{border-color:#334155;color:var(--text);}
+  .tab.active{background:var(--accent);border-color:var(--accent);color:#fff;
+    box-shadow:0 4px 16px rgba(99,102,241,.35);}
+  .tab.total{margin-left:auto;background:transparent;border-style:dashed;}
+  .tab.total.active{background:var(--blue);border-color:var(--blue);border-style:solid;color:#04121f;}
+  .grid{display:grid;grid-template-columns:1fr 300px;gap:20px;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:24px;}
+  .card h2{font-size:18px;font-weight:700;margin:0 0 4px;}
+  .card .desc{color:var(--muted);font-size:13px;margin:0 0 18px;}
+  .stat{margin-bottom:24px;}
+  .stat .num{font-size:52px;font-weight:800;line-height:1;letter-spacing:-0.02em;}
+  .stat .lbl{color:var(--muted);font-size:13px;margin-top:6px;}
+  .stat.caught .num{color:var(--green);}
+  .stat.delay .num{color:var(--amber);font-size:38px;}
+  .btn{background:var(--accent);color:#fff;border:none;border-radius:10px;
+    padding:11px 22px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;
+    transition:opacity .15s;}
+  .btn:hover{opacity:.9;} .btn:disabled{opacity:.45;cursor:default;}
+  .progress{color:var(--muted);font-size:13px;font-variant-numeric:tabular-nums;}
+  .pulse{animation:pulse 1.4s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+  .fade{animation:fade .4s ease;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+</style>
+</head>
+<body>
+  <div class="head"><h1>Sentinel</h1></div>
+  <p class="sub">Online anomaly detection across multivariate server telemetry.</p>
+
+  <div class="toprow">
+    <div><label style="color:var(--muted);font-size:13px;margin-right:8px">Machine</label>
+      <select id="machine-select"></select></div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="grid">
+    <div class="card">
+      <h2 id="view-title">Live detection</h2>
+      <p class="desc" id="view-desc">Replaying telemetry point-by-point. The line draws as each timestep is scored; shaded bands are true anomalies.</p>
+      <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
+        <button class="btn" id="play-btn">Start stream</button>
+        <span class="progress" id="progress"></span>
+      </div>
+      <div id="chart" style="height:420px"></div>
+    </div>
+    <div>
+      <div class="card" style="margin-bottom:20px">
+        <div class="stat caught">
+          <div class="num" id="caught-num">0 / 0</div>
+          <div class="lbl">anomaly segments caught</div>
+        </div>
+        <div class="stat delay" style="margin-bottom:0">
+          <div class="num" id="alarm-num">0</div>
+          <div class="lbl">timesteps flagged</div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="stat" style="margin-bottom:0">
+          <div class="num" id="score-num" style="font-size:34px;color:var(--blue)">–</div>
+          <div class="lbl">current anomaly score</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+<script src="/static/app.js"></script>
+</body>
+</html>

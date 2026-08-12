@@ -1,5 +1,5 @@
 import numpy as np
-from models.z_detector import ZScoreDetector
+from detector.z_detector import ZScoreDetector
 
 def test_zscore_streaming_matches_batch():
     """

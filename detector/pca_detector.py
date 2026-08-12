@@ -1,7 +1,7 @@
 import numpy as np
 from sklearn.decomposition import PCA
 from sklearn.preprocessing import StandardScaler
-from models.base import BaseDetector
+from detector.base import BaseDetector
 
 class PCADetector(BaseDetector):
     name = "pca"

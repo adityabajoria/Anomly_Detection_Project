@@ -1,5 +1,5 @@
 import numpy as np
-from models.base import BaseDetector
+from detector.base import BaseDetector
 
 class ZScoreDetector(BaseDetector):
     name = "zscore"
