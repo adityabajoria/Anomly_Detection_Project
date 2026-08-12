@@ -29,6 +29,7 @@ function selectTab(det){
   const title=det==="__total"?"All detectors — live":`${LABELS[det]||det} — live detection`;
   document.getElementById("view-title").textContent=title;
   resetChart();
+  updateStats();
 }
 
 function resetChart(){
@@ -45,6 +46,7 @@ function resetChart(){
 
 function stop(){
   if(evt){evt.close();evt=null;}
+  if(typeof streaming!=="undefined") streaming=false;
   const b=document.getElementById("play-btn");
   b.textContent="Start stream";b.disabled=false;b.classList.remove("pulse");
 }
@@ -53,12 +55,14 @@ function startStream(){
   if(current==="__total"){startTotal();return;}
   stop(); resetChart();
   const b=document.getElementById("play-btn");
-  b.textContent="Streaming…";b.disabled=true;b.classList.add("pulse");
+  b.textContent="Stop";b.disabled=false;b.classList.add("pulse");
 
   const xs=[],ys=[],fx=[],fy=[],shapes=[];
   let threshold=null,nSeg=0,caught=0,alarms=0,segStart=null,inCaught=false;
 
-  evt=new EventSource(`/api/stream/${machine}/${current}`);
+  const spd=document.getElementById("speed");
+  const delay=spd?(0.005+(spd.value/100)*0.06).toFixed(3):0.02;  // 5ms..65ms per step
+  evt=new EventSource(`/api/stream/${machine}/${current}?delay=${delay}`);
   evt.onmessage=e=>{
     const m=JSON.parse(e.data);
     if(m.meta){threshold=m.threshold;nSeg=m.n_segments;
@@ -80,7 +84,7 @@ function startStream(){
       document.getElementById("score-num").textContent=m.score.toFixed(3);
       if(threshold!==null&&m.score>=threshold){fx.push(m.t);fy.push(m.score);alarms++;}
     }
-    if(m.t%6===0){
+    if(m.t%2===0){
       Plotly.update("chart",{x:[xs,fx],y:[ys,fy]},{shapes},[0,1]);
       document.getElementById("alarm-num").textContent=alarms;
       document.getElementById("progress").textContent=`t = ${m.t}`;
@@ -100,7 +104,7 @@ async function startTotal(){
     {...DARK,height:420,xaxis:{title:"timestep",gridcolor:"#1e293b"},
      yaxis:{title:"anomaly score",gridcolor:"#1e293b"},showlegend:true,
      legend:{orientation:"h",y:1.1,font:{size:11}}},{displayModeBar:false});
-  const b=document.getElementById("play-btn");b.textContent="Streaming…";b.disabled=true;b.classList.add("pulse");
+  const b=document.getElementById("play-btn");b.textContent="Stop";b.disabled=false;b.classList.add("pulse");
   document.getElementById("view-desc").textContent="Every detector streamed together — compare how each responds to the same anomalies.";
   for(let i=0;i<dets.length;i++){await streamInto(dets[i],i);}
   stop();
@@ -116,5 +120,28 @@ function streamInto(det,idx){
   });
 }
 
-document.getElementById("play-btn").onclick=startStream;
+
+async function updateStats(){
+  if(current==="__total"){
+    ["stat-honest","stat-adjusted","stat-inflation","stat-prauc"].forEach(id=>
+      document.getElementById(id).textContent="–");
+    return;
+  }
+  try{
+    const res=await getJSON(`/api/results/${machine}`);
+    const r=res[current];
+    if(!r){return;}
+    const h=r.honest.f1, a=r.point_adjusted.f1;
+    document.getElementById("stat-honest").textContent=h.toFixed(3);
+    document.getElementById("stat-adjusted").textContent=a.toFixed(3);
+    document.getElementById("stat-inflation").textContent="+"+(a-h).toFixed(3);
+    document.getElementById("stat-prauc").textContent=(r.pr_auc!=null)?r.pr_auc.toFixed(3):"–";
+  }catch(e){console.error(e);}
+}
+
+let streaming=false;
+document.getElementById("play-btn").onclick=()=>{
+  if(streaming){ streaming=false; stop(); document.getElementById("progress").textContent="stopped"; }
+  else { streaming=true; startStream(); }
+};
 init().catch(e=>console.error(e));

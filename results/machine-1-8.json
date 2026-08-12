@@ -1,45 +1,45 @@
 {
-  "pca": {
-    "pr_auc": 0.2179369350492846,
-    "threshold": 12.594083229871888,
+  "random": {
+    "pr_auc": 0.03277058922623427,
+    "threshold": 0.0011407761460023869,
     "honest": {
-      "precision": 0.9323308270676691,
-      "recall": 0.16251638269986893,
-      "f1": 0.2767857142857143,
+      "precision": 0.03224170716247623,
+      "recall": 1.0,
+      "f1": 0.06246929752742754,
       "confusion_matrix": [
         [
-          22927,
-          9
+          34,
+          22902
         ],
         [
-          639,
-          124
+          0,
+          763
         ]
       ]
     },
     "point_adjusted": {
-      "precision": 0.9403973509933775,
-      "recall": 0.18610747051114024,
-      "f1": 0.31072210065645517,
+      "precision": 0.03224170716247623,
+      "recall": 1.0,
+      "f1": 0.06246929752742754,
       "confusion_matrix": [
         [
-          22927,
-          9
+          34,
+          22902
         ],
         [
-          621,
-          142
+          0,
+          763
         ]
       ]
     },
     "detection_delay": {
-      "mean_delay": 2.6666666666666665,
-      "segments_detected": 3,
+      "mean_delay": 0.0,
+      "segments_detected": 20,
       "segments_total": 20
     },
-    "fit_seconds": 0.0055,
-    "score_seconds": 0.0043,
-    "throughput_pts_per_sec": 5466477
+    "fit_seconds": 0.0,
+    "score_seconds": 0.0003,
+    "throughput_pts_per_sec": 83447181
   },
   "zscore": {
     "pr_auc": 0.24133342415240114,
@@ -79,8 +79,134 @@
       "segments_detected": 12,
       "segments_total": 20
     },
-    "fit_seconds": 0.0018,
-    "score_seconds": 0.0013,
-    "throughput_pts_per_sec": 18388552
+    "fit_seconds": 0.0025,
+    "score_seconds": 0.001,
+    "throughput_pts_per_sec": 23571338
+  },
+  "pca": {
+    "pr_auc": 0.2179369350492846,
+    "threshold": 12.594083229871888,
+    "honest": {
+      "precision": 0.9323308270676691,
+      "recall": 0.16251638269986893,
+      "f1": 0.2767857142857143,
+      "confusion_matrix": [
+        [
+          22927,
+          9
+        ],
+        [
+          639,
+          124
+        ]
+      ]
+    },
+    "point_adjusted": {
+      "precision": 0.9403973509933775,
+      "recall": 0.18610747051114024,
+      "f1": 0.31072210065645517,
+      "confusion_matrix": [
+        [
+          22927,
+          9
+        ],
+        [
+          621,
+          142
+        ]
+      ]
+    },
+    "detection_delay": {
+      "mean_delay": 2.6666666666666665,
+      "segments_detected": 3,
+      "segments_total": 20
+    },
+    "fit_seconds": 0.0057,
+    "score_seconds": 0.0045,
+    "throughput_pts_per_sec": 5229019
+  },
+  "iforest": {
+    "pr_auc": 0.10297917832231533,
+    "threshold": 0.6620065713004835,
+    "honest": {
+      "precision": 0.18850987432675045,
+      "recall": 0.13761467889908258,
+      "f1": 0.1590909090909091,
+      "confusion_matrix": [
+        [
+          22484,
+          452
+        ],
+        [
+          658,
+          105
+        ]
+      ]
+    },
+    "point_adjusted": {
+      "precision": 0.36338028169014086,
+      "recall": 0.3381389252948886,
+      "f1": 0.35030549898167007,
+      "confusion_matrix": [
+        [
+          22484,
+          452
+        ],
+        [
+          505,
+          258
+        ]
+      ]
+    },
+    "detection_delay": {
+      "mean_delay": 4.0,
+      "segments_detected": 4,
+      "segments_total": 20
+    },
+    "fit_seconds": 0.0973,
+    "score_seconds": 0.0548,
+    "throughput_pts_per_sec": 432178
+  },
+  "lstm_autoencoder": {
+    "pr_auc": 0.25640903401452275,
+    "threshold": 0.005951497238129377,
+    "honest": {
+      "precision": 0.8352272727272727,
+      "recall": 0.1926605504587156,
+      "f1": 0.31309904153354634,
+      "confusion_matrix": [
+        [
+          22907,
+          29
+        ],
+        [
+          616,
+          147
+        ]
+      ]
+    },
+    "point_adjusted": {
+      "precision": 0.9171428571428571,
+      "recall": 0.42070773263433814,
+      "f1": 0.5768194070080862,
+      "confusion_matrix": [
+        [
+          22907,
+          29
+        ],
+        [
+          442,
+          321
+        ]
+      ]
+    },
+    "detection_delay": {
+      "mean_delay": 4.25,
+      "segments_detected": 4,
+      "segments_total": 20
+    },
+    "fit_seconds": 7.4646,
+    "score_seconds": 0.1037,
+    "throughput_pts_per_sec": 228426
   }
 }

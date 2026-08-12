@@ -38,8 +38,8 @@
       "segments_total": 8
     },
     "fit_seconds": 0.0,
-    "score_seconds": 0.0003,
-    "throughput_pts_per_sec": 110241436
+    "score_seconds": 0.0002,
+    "throughput_pts_per_sec": 114010880
   },
   "zscore": {
     "pr_auc": 0.4471485457496451,
@@ -79,9 +79,9 @@
       "segments_detected": 8,
       "segments_total": 8
     },
-    "fit_seconds": 0.0047,
-    "score_seconds": 0.003,
-    "throughput_pts_per_sec": 9343504
+    "fit_seconds": 0.0035,
+    "score_seconds": 0.0018,
+    "throughput_pts_per_sec": 16017057
   },
   "pca": {
     "pr_auc": 0.38203873792885995,
@@ -121,9 +121,9 @@
       "segments_detected": 8,
       "segments_total": 8
     },
-    "fit_seconds": 0.0148,
-    "score_seconds": 0.0108,
-    "throughput_pts_per_sec": 2640418
+    "fit_seconds": 0.0072,
+    "score_seconds": 0.0071,
+    "throughput_pts_per_sec": 3994670
   },
   "iforest": {
     "pr_auc": 0.3853053530173482,
@@ -163,9 +163,9 @@
       "segments_detected": 5,
       "segments_total": 8
     },
-    "fit_seconds": 0.1074,
-    "score_seconds": 0.0741,
-    "throughput_pts_per_sec": 384103
+    "fit_seconds": 0.1059,
+    "score_seconds": 0.0748,
+    "throughput_pts_per_sec": 380670
   },
   "lstm_autoencoder": {
     "pr_auc": 0.6083613785195576,
@@ -205,8 +205,8 @@
       "segments_detected": 8,
       "segments_total": 8
     },
-    "fit_seconds": 9.9846,
-    "score_seconds": 0.1337,
-    "throughput_pts_per_sec": 212933
+    "fit_seconds": 9.8473,
+    "score_seconds": 0.1175,
+    "throughput_pts_per_sec": 242277
   }
 }

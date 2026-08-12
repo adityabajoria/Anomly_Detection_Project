@@ -1,30 +1,30 @@
 {
-  "pca": {
-    "pr_auc": 0.1472972108545212,
-    "threshold": 0.018715246752968085,
+  "random": {
+    "pr_auc": 0.1223897800324808,
+    "threshold": 1.9239516578783977e-05,
     "honest": {
-      "precision": 0.14983884759586924,
-      "recall": 0.8040945993646311,
-      "f1": 0.2526058993124861,
+      "precision": 0.11954090889910966,
+      "recall": 1.0,
+      "f1": 0.21355344489672848,
       "confusion_matrix": [
         [
-          7942,
-          12925
+          1,
+          20866
         ],
         [
-          555,
-          2278
+          0,
+          2833
         ]
       ]
     },
     "point_adjusted": {
-      "precision": 0.17978169818504885,
+      "precision": 0.11954090889910966,
       "recall": 1.0,
-      "f1": 0.3047711258135657,
+      "f1": 0.21355344489672848,
       "confusion_matrix": [
         [
-          7942,
-          12925
+          1,
+          20866
         ],
         [
           0,
@@ -37,9 +37,9 @@
       "segments_detected": 11,
       "segments_total": 11
     },
-    "fit_seconds": 0.0062,
-    "score_seconds": 0.0052,
-    "throughput_pts_per_sec": 4515934
+    "fit_seconds": 0.0,
+    "score_seconds": 0.0002,
+    "throughput_pts_per_sec": 106198964
   },
   "zscore": {
     "pr_auc": 0.15068532651059247,
@@ -79,8 +79,134 @@
       "segments_detected": 11,
       "segments_total": 11
     },
-    "fit_seconds": 0.0014,
-    "score_seconds": 0.0011,
-    "throughput_pts_per_sec": 21016060
+    "fit_seconds": 0.0017,
+    "score_seconds": 0.001,
+    "throughput_pts_per_sec": 23937386
+  },
+  "pca": {
+    "pr_auc": 0.1472972108545212,
+    "threshold": 0.018715246752968085,
+    "honest": {
+      "precision": 0.14983884759586924,
+      "recall": 0.8040945993646311,
+      "f1": 0.2526058993124861,
+      "confusion_matrix": [
+        [
+          7942,
+          12925
+        ],
+        [
+          555,
+          2278
+        ]
+      ]
+    },
+    "point_adjusted": {
+      "precision": 0.17978169818504885,
+      "recall": 1.0,
+      "f1": 0.3047711258135657,
+      "confusion_matrix": [
+        [
+          7942,
+          12925
+        ],
+        [
+          0,
+          2833
+        ]
+      ]
+    },
+    "detection_delay": {
+      "mean_delay": 0.0,
+      "segments_detected": 11,
+      "segments_total": 11
+    },
+    "fit_seconds": 0.0052,
+    "score_seconds": 0.0053,
+    "throughput_pts_per_sec": 4434880
+  },
+  "iforest": {
+    "pr_auc": 0.1849630902169788,
+    "threshold": 0.4046162084924545,
+    "honest": {
+      "precision": 0.16140045035229172,
+      "recall": 0.7843275679491705,
+      "f1": 0.267710843373494,
+      "confusion_matrix": [
+        [
+          9322,
+          11545
+        ],
+        [
+          611,
+          2222
+        ]
+      ]
+    },
+    "point_adjusted": {
+      "precision": 0.19703714007511475,
+      "recall": 1.0,
+      "f1": 0.32920806460984253,
+      "confusion_matrix": [
+        [
+          9322,
+          11545
+        ],
+        [
+          0,
+          2833
+        ]
+      ]
+    },
+    "detection_delay": {
+      "mean_delay": 0.2727272727272727,
+      "segments_detected": 11,
+      "segments_total": 11
+    },
+    "fit_seconds": 0.0963,
+    "score_seconds": 0.0678,
+    "throughput_pts_per_sec": 349459
+  },
+  "lstm_autoencoder": {
+    "pr_auc": 0.14636029255479252,
+    "threshold": 0.0023275490384548903,
+    "honest": {
+      "precision": 0.12942846225230634,
+      "recall": 0.8369219908224497,
+      "f1": 0.22418683812405446,
+      "confusion_matrix": [
+        [
+          4919,
+          15948
+        ],
+        [
+          462,
+          2371
+        ]
+      ]
+    },
+    "point_adjusted": {
+      "precision": 0.1508439380224695,
+      "recall": 1.0,
+      "f1": 0.262144906079393,
+      "confusion_matrix": [
+        [
+          4919,
+          15948
+        ],
+        [
+          0,
+          2833
+        ]
+      ]
+    },
+    "detection_delay": {
+      "mean_delay": 0.0,
+      "segments_detected": 11,
+      "segments_total": 11
+    },
+    "fit_seconds": 7.548,
+    "score_seconds": 0.0961,
+    "throughput_pts_per_sec": 246719
   }
 }

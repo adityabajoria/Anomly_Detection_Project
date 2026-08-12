@@ -100,7 +100,7 @@ def score(req: ScoreRequest):
 
 
 @app.get("/api/stream/{machine_id}/{detector}")
-def stream(machine_id: str, detector: str):
+def stream(machine_id: str, detector: str, delay: float = 0.02):
     det = REGISTRY.get((machine_id, detector))
     if det is None:
         raise HTTPException(404, f"No '{detector}' for machine '{machine_id}'")
@@ -108,8 +108,12 @@ def stream(machine_id: str, detector: str):
     if not test_path.exists():
         raise HTTPException(404, f"No test set on disk for '{machine_id}'")
     npz = np.load(test_path)
+    # use the threshold the offline experiment already computed for this detector,
+    # so live detections match the benchmark numbers
+    score_path = SCORES_DIR / f"{machine_id}_{detector}.npz"
+    threshold = float(np.load(score_path)["threshold"]) if score_path.exists() else 0.0
     return StreamingResponse(
-        stream_scores(det, npz["test"], npz["labels"]),
+        stream_scores(det, npz["test"], npz["labels"], threshold, delay=max(0.0, min(delay, 0.2))),
         media_type="text/event-stream",
     )
 

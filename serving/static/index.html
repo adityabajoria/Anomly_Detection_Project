@@ -43,6 +43,13 @@
   .pulse{animation:pulse 1.4s ease-in-out infinite;}
   @keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
   .fade{animation:fade .4s ease;}
+  .statsrow{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:24px;}
+  .statcard{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px 24px;}
+  .statcard .sv{font-size:30px;font-weight:800;letter-spacing:-0.01em;}
+  .statcard .sl{color:var(--muted);font-size:13px;margin-top:6px;}
+  #stat-honest{color:var(--blue);} #stat-adjusted{color:var(--amber);}
+  #stat-inflation{color:var(--red);} #stat-prauc{color:var(--text);}
+
   @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 </style>
 </head>
@@ -63,6 +70,8 @@
       <p class="desc" id="view-desc">Replaying telemetry point-by-point. The line draws as each timestep is scored; shaded bands are true anomalies.</p>
       <div style="display:flex;gap:16px;align-items:center;margin-bottom:16px">
         <button class="btn" id="play-btn">Start stream</button>
+        <label style="color:var(--muted);font-size:13px;margin-left:8px">Speed</label>
+        <input type="range" id="speed" min="0" max="100" value="60" style="width:120px">
         <span class="progress" id="progress"></span>
       </div>
       <div id="chart" style="height:420px"></div>
@@ -85,6 +94,13 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="statsrow" id="statsrow">
+    <div class="statcard"><div class="sv" id="stat-honest">–</div><div class="sl">Honest F1</div></div>
+    <div class="statcard"><div class="sv" id="stat-adjusted">–</div><div class="sl">Point-Adjusted F1</div></div>
+    <div class="statcard"><div class="sv" id="stat-inflation">–</div><div class="sl">Inflation gap</div></div>
+    <div class="statcard"><div class="sv" id="stat-prauc">–</div><div class="sl">PR-AUC</div></div>
   </div>
 
 <script src="/static/app.js"></script>
