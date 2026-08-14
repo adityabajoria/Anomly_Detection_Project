@@ -13,15 +13,18 @@
 
     <title>Sentinel</title>
 
+
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
         rel="stylesheet"
     >
 
+
     <link
         rel="stylesheet"
         href="/static/styles.css"
     >
+
 
     <script
         src="https://cdn.plot.ly/plotly-2.35.2.min.js"
@@ -34,6 +37,7 @@
 
 <div class="app">
 
+
     <!-- =====================================================
          Sidebar
     ====================================================== -->
@@ -45,6 +49,7 @@
             <div class="brand">
                 Sentinel<span>.</span>
             </div>
+
 
             <p class="brand-subtitle">
                 streaming ML inference
@@ -93,6 +98,7 @@
 
             </div>
 
+
             <p>
                 Persistent telemetry is routed through
                 dynamically selected anomaly detectors
@@ -111,6 +117,9 @@
 
     <main class="main">
 
+
+        <!-- Tabs -->
+
         <nav class="top-tabs">
 
             <button
@@ -120,11 +129,12 @@
                 Live Inference
             </button>
 
+
             <button
                 class="top-tab"
                 data-view="evaluation"
             >
-                Model Evaluation
+                Model Diagnostics
             </button>
 
         </nav>
@@ -136,12 +146,11 @@
 
 
         <!-- =================================================
-             LIVE INFERENCE VIEW
+             LIVE INFERENCE
         ================================================== -->
 
-        <section
-            id="live-view"
-        >
+        <section id="live-view">
+
 
             <header class="page-header">
 
@@ -151,9 +160,11 @@
                         INFERENCE MONITOR
                     </p>
 
+
                     <h1>
                         Telemetry Stream
                     </h1>
+
 
                     <p class="header-description">
                         Persistent online scoring with
@@ -168,7 +179,9 @@
                     id="stream-badge"
                 >
 
-                    <span class="stream-dot"></span>
+                    <span
+                        class="stream-dot"
+                    ></span>
 
                     <span id="live-label">
                         Idle
@@ -179,9 +192,10 @@
             </header>
 
 
-            <!-- KPI ROW -->
+            <!-- KPIs -->
 
             <section class="metrics">
+
 
                 <article class="metric-card">
 
@@ -265,7 +279,7 @@
             </section>
 
 
-            <!-- LIVE GRAPH -->
+            <!-- Live Graph -->
 
             <section class="panel chart-panel">
 
@@ -299,6 +313,7 @@
                         >
                             ▶
                         </button>
+
 
                         <button
                             class="action-button"
@@ -371,12 +386,12 @@
             </section>
 
 
-            <!-- LOWER PANELS -->
+            <!-- Lower Panels -->
 
             <section class="monitor-grid">
 
 
-                <!-- EVENT LOG -->
+                <!-- Event Log -->
 
                 <article class="panel monitor-panel">
 
@@ -407,13 +422,21 @@
 
                     <div class="event-table-header">
 
-                        <span>Timestep</span>
+                        <span>
+                            Timestep
+                        </span>
 
-                        <span>Score</span>
+                        <span>
+                            Score
+                        </span>
 
-                        <span>Model</span>
+                        <span>
+                            Model
+                        </span>
 
-                        <span>Status</span>
+                        <span>
+                            Status
+                        </span>
 
                     </div>
 
@@ -433,7 +456,7 @@
                 </article>
 
 
-                <!-- SERVICE PANEL -->
+                <!-- Service Panel -->
 
                 <article class="panel monitor-panel">
 
@@ -464,6 +487,7 @@
 
 
                     <div class="service-list">
+
 
                         <div class="service-row">
 
@@ -587,8 +611,6 @@
                         </div>
 
 
-                        <!-- ADVANCED THRESHOLD -->
-
                         <details class="advanced-settings">
 
                             <summary>
@@ -605,6 +627,7 @@
                                     placeholder="Enter override"
                                 >
 
+
                                 <button
                                     id="threshold-apply"
                                     class="small-button"
@@ -612,14 +635,19 @@
                                     Apply
                                 </button>
 
+
                                 <button
                                     id="threshold-reset"
-                                    class="small-button secondary"
+                                    class="
+                                        small-button
+                                        secondary
+                                    "
                                 >
                                     Reset
                                 </button>
 
                             </div>
+
 
                             <p class="advanced-help">
                                 Sentinel automatically uses each detector's
@@ -638,7 +666,7 @@
 
 
         <!-- =================================================
-             MODEL EVALUATION PLACEHOLDER
+             MODEL DIAGNOSTICS
         ================================================== -->
 
         <section
@@ -646,23 +674,449 @@
             class="hidden"
         >
 
-            <div class="evaluation-placeholder">
 
-                <p class="eyebrow">
-                    MODEL EVALUATION
+            <header class="evaluation-header">
+
+                <div>
+
+                    <p class="eyebrow">
+                        MODEL REGISTRY
+                    </p>
+
+
+                    <h1>
+                        Model Diagnostics
+                    </h1>
+
+
+                    <p class="header-description">
+                        Validation quality and serving characteristics
+                        for detector artifacts available to Sentinel.
+                    </p>
+
+                </div>
+
+
+                <div class="evaluation-machine-badge">
+
+                    <span>
+                        MACHINE
+                    </span>
+
+                    <strong
+                        id="evaluation-machine"
+                    >
+                        —
+                    </strong>
+
+                </div>
+
+            </header>
+
+
+            <div
+                class="evaluation-detectors"
+                id="evaluation-detectors"
+            ></div>
+
+
+            <!-- Registry Table -->
+
+            <section class="panel evaluation-summary">
+
+                <div class="panel-header">
+
+                    <div>
+
+                        <p class="panel-eyebrow">
+                            DEPLOYABLE ARTIFACTS
+                        </p>
+
+
+                        <h2>
+                            Detector Registry
+                        </h2>
+
+
+                        <p class="panel-description">
+                            Offline validation metrics, calibrated
+                            thresholds and scoring throughput for
+                            deployable models.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <div class="evaluation-table-wrap">
+
+                    <table class="evaluation-table">
+
+                        <thead>
+
+                        <tr>
+
+                            <th>
+                                Detector
+                            </th>
+
+                            <th class="numeric">
+                                Precision
+                            </th>
+
+                            <th class="numeric">
+                                Recall
+                            </th>
+
+                            <th class="numeric">
+                                Honest F1
+                            </th>
+
+                            <th class="numeric">
+                                PR-AUC
+                            </th>
+
+                            <th class="numeric">
+                                Threshold
+                            </th>
+
+                            <th class="numeric">
+                                Offline Throughput
+                            </th>
+
+                            <th>
+                                Artifact
+                            </th>
+
+                        </tr>
+
+                        </thead>
+
+
+                        <tbody
+                            id="evaluation-table-body"
+                        ></tbody>
+
+                    </table>
+
+                </div>
+
+            </section>
+
+
+            <!-- Selected Artifact -->
+
+            <section class="evaluation-detail-grid">
+
+
+                <article
+                    class="
+                        panel
+                        evaluation-detail-panel
+                    "
+                >
+
+                    <p class="panel-eyebrow">
+                        SELECTED ARTIFACT
+                    </p>
+
+
+                    <h2
+                        id="evaluation-selected-name"
+                    >
+                        —
+                    </h2>
+
+
+                    <div class="diagnostic-list">
+
+
+                        <div class="diagnostic-row">
+
+                            <span>
+                                Deployment status
+                            </span>
+
+                            <strong
+                                class="positive"
+                                id="diag-status"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="diagnostic-row">
+
+                            <span>
+                                Calibrated threshold
+                            </span>
+
+                            <strong
+                                class="mono"
+                                id="diag-threshold"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="diagnostic-row">
+
+                            <span>
+                                Honest F1
+                            </span>
+
+                            <strong
+                                class="mono"
+                                id="diag-f1"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="diagnostic-row">
+
+                            <span>
+                                Precision
+                            </span>
+
+                            <strong
+                                class="mono"
+                                id="diag-precision"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="diagnostic-row">
+
+                            <span>
+                                Recall
+                            </span>
+
+                            <strong
+                                class="mono"
+                                id="diag-recall"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="diagnostic-row">
+
+                            <span>
+                                PR-AUC
+                            </span>
+
+                            <strong
+                                class="mono"
+                                id="diag-pr-auc"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="diagnostic-row">
+
+                            <span>
+                                Mean detection delay
+                            </span>
+
+                            <strong
+                                class="mono"
+                                id="diag-delay"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="diagnostic-row">
+
+                            <span>
+                                Segments detected
+                            </span>
+
+                            <strong
+                                class="mono"
+                                id="diag-segments"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- Serving Characteristics -->
+
+                <article
+                    class="
+                        panel
+                        evaluation-detail-panel
+                    "
+                >
+
+                    <p class="panel-eyebrow">
+                        SERVING CHARACTERISTICS
+                    </p>
+
+
+                    <h2>
+                        Artifact Performance
+                    </h2>
+
+
+                    <p class="panel-description">
+                        Offline model execution characteristics
+                        recorded during detector evaluation.
+                    </p>
+
+
+                    <div class="serving-stat-grid">
+
+
+                        <div class="serving-stat">
+
+                            <span>
+                                Fit time
+                            </span>
+
+                            <strong
+                                id="diag-fit-time"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div class="serving-stat">
+
+                            <span>
+                                Score time
+                            </span>
+
+                            <strong
+                                id="diag-score-time"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div
+                            class="
+                                serving-stat
+                                serving-stat-wide
+                            "
+                        >
+
+                            <span>
+                                Offline throughput
+                            </span>
+
+                            <strong
+                                id="diag-throughput"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="point-adjustment-block">
+
+
+                        <div>
+
+                            <span>
+                                Point-adjusted F1
+                            </span>
+
+                            <strong
+                                id="diag-adjusted-f1"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+
+                        <div>
+
+                            <span>
+                                Adjustment gap
+                            </span>
+
+                            <strong
+                                class="warning"
+                                id="diag-adjustment-gap"
+                            >
+                                —
+                            </strong>
+
+                        </div>
+
+                    </div>
+
+
+                    <p class="diagnostic-note">
+                        Point-adjusted scoring is retained as a
+                        diagnostic only and is not surfaced as a
+                        live serving metric.
+                    </p>
+
+                </article>
+
+            </section>
+
+
+            <!-- Phase 3B placeholder -->
+
+            <section
+                class="
+                    panel
+                    evaluation-chart-placeholder
+                "
+            >
+
+                <p class="panel-eyebrow">
+                    OFFLINE SCORE DIAGNOSTIC
                 </p>
 
-                <h1>
-                    Detector Evaluation
-                </h1>
+
+                <h2>
+                    Score vs Ground Truth
+                </h2>
+
 
                 <p>
-                    Offline detector comparison, threshold
-                    calibration and ground-truth metrics will
-                    be added in Phase 3.
+                    The selected detector's offline score trace,
+                    calibrated threshold and labeled anomaly regions
+                    will be connected in the next step.
                 </p>
 
-            </div>
+            </section>
 
         </section>
 

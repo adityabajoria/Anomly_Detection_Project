@@ -28,6 +28,10 @@
 }
 
 
+/* ============================================================
+   Base
+============================================================ */
+
 * {
     box-sizing: border-box;
 }
@@ -36,6 +40,7 @@
 html,
 body {
     margin: 0;
+
     min-height: 100%;
 }
 
@@ -85,7 +90,8 @@ input {
     height: 100vh;
 
     padding:
-        28px 22px;
+        28px
+        22px;
 
     background:
         var(--sidebar);
@@ -110,7 +116,9 @@ input {
     max-width: 1500px;
 
     padding:
-        26px 38px 50px;
+        26px
+        38px
+        50px;
 }
 
 
@@ -129,13 +137,16 @@ input {
 
 
 .brand span {
-    color: var(--cyan);
+    color:
+        var(--cyan);
 }
 
 
 .brand-subtitle {
     margin:
-        4px 0 34px;
+        4px
+        0
+        34px;
 
     color:
         var(--muted);
@@ -178,7 +189,8 @@ input {
     width: 100%;
 
     padding:
-        10px 12px;
+        10px
+        12px;
 
     background:
         #0e1016;
@@ -219,9 +231,10 @@ input {
 .sidebar-system-row {
     display: flex;
 
-    gap: 8px;
+    align-items:
+        center;
 
-    align-items: center;
+    gap: 8px;
 
     margin-bottom:
         10px;
@@ -274,7 +287,7 @@ input {
 
 
 /* ============================================================
-   Tabs
+   Top Tabs
 ============================================================ */
 
 .top-tabs {
@@ -296,7 +309,8 @@ input {
 
 .top-tab {
     padding:
-        8px 13px;
+        8px
+        13px;
 
     background:
         transparent;
@@ -304,8 +318,7 @@ input {
     color:
         var(--muted);
 
-    border:
-        none;
+    border: none;
 
     border-radius:
         7px;
@@ -326,7 +339,7 @@ input {
         var(--text);
 
     background:
-        #0d0f14;
+        var(--panel);
 }
 
 
@@ -340,7 +353,8 @@ input {
 
 
 .hidden {
-    display: none;
+    display: none
+        !important;
 }
 
 
@@ -348,7 +362,8 @@ input {
    Header
 ============================================================ */
 
-.page-header {
+.page-header,
+.evaluation-header {
     display: flex;
 
     justify-content:
@@ -365,7 +380,9 @@ input {
 .eyebrow,
 .panel-eyebrow {
     margin:
-        0 0 6px;
+        0
+        0
+        6px;
 
     color:
         var(--cyan);
@@ -382,7 +399,7 @@ input {
 
 
 .page-header h1,
-.evaluation-placeholder h1 {
+.evaluation-header h1 {
     margin: 0;
 
     font-size:
@@ -398,7 +415,9 @@ input {
 
 .header-description {
     margin:
-        7px 0 0;
+        7px
+        0
+        0;
 
     color:
         var(--muted);
@@ -417,7 +436,8 @@ input {
     gap: 8px;
 
     padding:
-        8px 12px;
+        8px
+        12px;
 
     background:
         var(--panel);
@@ -471,11 +491,14 @@ input {
         );
 
     animation:
-        pulse 1.4s infinite;
+        pulse
+        1.4s
+        infinite;
 }
 
 
 @keyframes pulse {
+
     0%,
     100% {
         opacity: 1;
@@ -498,7 +521,8 @@ input {
         20px;
 
     padding:
-        12px 15px;
+        12px
+        15px;
 
     color:
         #fda4af;
@@ -550,7 +574,8 @@ input {
 
 .metric-card {
     padding:
-        16px 17px;
+        16px
+        17px;
 
     background:
         var(--panel);
@@ -631,7 +656,7 @@ input {
 
 
 /* ============================================================
-   Panels
+   Generic Panels
 ============================================================ */
 
 .panel {
@@ -680,7 +705,9 @@ input {
         760px;
 
     margin:
-        7px 0 0;
+        7px
+        0
+        0;
 
     color:
         var(--muted);
@@ -694,7 +721,7 @@ input {
 
 
 /* ============================================================
-   Chart
+   Live Chart
 ============================================================ */
 
 .chart-panel {
@@ -702,7 +729,9 @@ input {
         18px;
 
     padding:
-        20px 22px 15px;
+        20px
+        22px
+        15px;
 }
 
 
@@ -789,7 +818,8 @@ input {
 #chart {
     width: 100%;
 
-    height: 410px;
+    height:
+        410px;
 }
 
 
@@ -893,7 +923,7 @@ input {
 
 
 /* ============================================================
-   Lower Panels
+   Live Lower Panels
 ============================================================ */
 
 .monitor-grid {
@@ -912,7 +942,8 @@ input {
         270px;
 
     padding:
-        19px 20px;
+        19px
+        20px;
 }
 
 
@@ -946,7 +977,9 @@ input {
         18px;
 
     padding:
-        0 11px 9px;
+        0
+        11px
+        9px;
 
     color:
         var(--muted-dark);
@@ -983,7 +1016,8 @@ input {
         center;
 
     padding:
-        10px 11px;
+        10px
+        11px;
 
     border-bottom:
         1px solid
@@ -1031,7 +1065,8 @@ input {
         fit-content;
 
     padding:
-        3px 7px;
+        3px
+        7px;
 
     border-radius:
         20px;
@@ -1165,7 +1200,8 @@ input {
     gap: 20px;
 
     padding:
-        10px 0;
+        10px
+        0;
 
     border-bottom:
         1px solid
@@ -1194,13 +1230,16 @@ input {
 }
 
 
-.service-value.positive {
+.service-value.positive,
+.positive {
     color:
-        var(--green);
+        var(--green)
+        !important;
 }
 
 
-.service-value.mono {
+.service-value.mono,
+.mono {
     font-variant-numeric:
         tabular-nums;
 }
@@ -1253,7 +1292,8 @@ input {
     width: 100%;
 
     padding:
-        7px 9px;
+        7px
+        9px;
 
     color:
         var(--text);
@@ -1283,7 +1323,8 @@ input {
 
 .small-button {
     padding:
-        7px 10px;
+        7px
+        10px;
 
     color:
         var(--cyan);
@@ -1325,7 +1366,9 @@ input {
 
 .advanced-help {
     margin:
-        8px 0 0;
+        8px
+        0
+        0;
 
     color:
         var(--muted-dark);
@@ -1339,38 +1382,595 @@ input {
 
 
 /* ============================================================
-   Evaluation Placeholder
+   MODEL DIAGNOSTICS
 ============================================================ */
 
-.evaluation-placeholder {
-    min-height:
-        450px;
-
+.evaluation-machine-badge {
     display: flex;
 
     flex-direction:
         column;
 
-    justify-content:
-        center;
+    gap: 4px;
 
-    align-items:
-        center;
+    padding:
+        9px
+        13px;
 
-    text-align:
-        center;
+    background:
+        var(--panel);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        10px;
 }
 
 
-.evaluation-placeholder p:last-child {
-    max-width:
-        500px;
+.evaluation-machine-badge span {
+    color:
+        var(--muted-dark);
+
+    font-size:
+        8px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.08em;
+}
+
+
+.evaluation-machine-badge strong {
+    color:
+        #d5dae4;
+
+    font-size:
+        11px;
+
+    font-weight:
+        600;
+}
+
+
+/* Detector Tabs */
+
+.evaluation-detectors {
+    display: flex;
+
+    flex-wrap:
+        wrap;
+
+    gap: 7px;
+
+    margin-bottom:
+        18px;
+}
+
+
+.detector-tab {
+    padding:
+        7px
+        11px;
 
     color:
         var(--muted);
 
+    background:
+        var(--panel);
+
+    border:
+        1px solid
+        var(--border);
+
+    border-radius:
+        8px;
+
+    font-size:
+        10px;
+
+    font-weight:
+        600;
+
+    cursor:
+        pointer;
+}
+
+
+.detector-tab:hover {
+    color:
+        var(--text);
+
+    border-color:
+        #303541;
+}
+
+
+.detector-tab.active {
+    color:
+        var(--cyan);
+
+    background:
+        var(--cyan-soft);
+
+    border-color:
+        rgba(
+            34,
+            211,
+            238,
+            0.25
+        );
+}
+
+
+/* Registry Table */
+
+.evaluation-summary {
+    padding:
+        20px
+        22px;
+
+    margin-bottom:
+        18px;
+}
+
+
+.evaluation-table-wrap {
+    margin-top:
+        17px;
+
+    overflow-x:
+        auto;
+}
+
+
+.evaluation-table {
+    width: 100%;
+
+    border-collapse:
+        collapse;
+
+    font-size:
+        10.5px;
+}
+
+
+.evaluation-table th {
+    padding:
+        9px
+        11px;
+
+    color:
+        var(--muted-dark);
+
+    border-bottom:
+        1px solid
+        var(--border);
+
+    text-align:
+        left;
+
+    white-space:
+        nowrap;
+
+    font-size:
+        8px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.07em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.evaluation-table td {
+    padding:
+        11px;
+
+    color:
+        #cfd4df;
+
+    border-bottom:
+        1px solid
+        var(--border-soft);
+
+    white-space:
+        nowrap;
+
+    cursor:
+        pointer;
+}
+
+
+.evaluation-table tbody tr:hover {
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.015
+        );
+}
+
+
+.evaluation-table tbody tr.selected {
+    background:
+        rgba(
+            34,
+            211,
+            238,
+            0.035
+        );
+}
+
+
+.evaluation-table .numeric {
+    text-align:
+        right;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+.detector-name {
+    color:
+        var(--text);
+
+    font-weight:
+        600;
+}
+
+
+.metric-strong {
+    color:
+        var(--text)
+        !important;
+
+    font-weight:
+        700;
+}
+
+
+.threshold-value {
+    color:
+        var(--muted)
+        !important;
+}
+
+
+.throughput-value {
+    color:
+        #b6bdca
+        !important;
+
+    font-size:
+        9.5px;
+}
+
+
+.artifact-ready {
+    display:
+        inline-flex;
+
+    padding:
+        3px
+        7px;
+
+    color:
+        var(--green);
+
+    background:
+        var(--green-soft);
+
+    border-radius:
+        20px;
+
+    font-size:
+        8px;
+
+    font-weight:
+        700;
+
+    letter-spacing:
+        0.04em;
+
+    text-transform:
+        uppercase;
+}
+
+
+.evaluation-empty {
+    padding:
+        36px
+        !important;
+
+    color:
+        var(--muted-dark)
+        !important;
+
+    text-align:
+        center
+        !important;
+}
+
+
+.evaluation-error {
+    color:
+        #fda4af
+        !important;
+}
+
+
+/* Selected Artifact */
+
+.evaluation-detail-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 18px;
+
+    margin-bottom:
+        18px;
+}
+
+
+.evaluation-detail-panel {
+    padding:
+        19px
+        20px;
+}
+
+
+.evaluation-detail-panel h2 {
+    margin: 0;
+
+    font-size:
+        17px;
+}
+
+
+.diagnostic-list {
+    margin-top:
+        16px;
+}
+
+
+.diagnostic-row {
+    display: flex;
+
+    justify-content:
+        space-between;
+
+    align-items:
+        center;
+
+    gap: 20px;
+
+    padding:
+        9px
+        0;
+
+    border-bottom:
+        1px solid
+        var(--border-soft);
+
+    font-size:
+        10.5px;
+}
+
+
+.diagnostic-row span {
+    color:
+        var(--muted);
+}
+
+
+.diagnostic-row strong {
+    color:
+        #d5dae4;
+
+    font-weight:
+        600;
+}
+
+
+/* Serving Characteristics */
+
+.serving-stat-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 10px;
+
+    margin-top:
+        20px;
+}
+
+
+.serving-stat {
+    padding:
+        14px;
+
+    background:
+        #0a0c11;
+
+    border:
+        1px solid
+        var(--border-soft);
+
+    border-radius:
+        10px;
+}
+
+
+.serving-stat-wide {
+    grid-column:
+        1 / -1;
+}
+
+
+.serving-stat span {
+    display: block;
+
+    margin-bottom:
+        7px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        9px;
+}
+
+
+.serving-stat strong {
+    color:
+        var(--text);
+
+    font-size:
+        17px;
+
+    font-weight:
+        700;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+.point-adjustment-block {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+
+    gap: 10px;
+
+    margin-top:
+        12px;
+}
+
+
+.point-adjustment-block > div {
+    padding:
+        13px;
+
+    background:
+        rgba(
+            251,
+            191,
+            36,
+            0.025
+        );
+
+    border:
+        1px solid
+        var(--border-soft);
+
+    border-radius:
+        10px;
+}
+
+
+.point-adjustment-block span {
+    display: block;
+
+    margin-bottom:
+        7px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        9px;
+}
+
+
+.point-adjustment-block strong {
+    font-size:
+        16px;
+
+    font-variant-numeric:
+        tabular-nums;
+}
+
+
+.warning {
+    color:
+        var(--amber)
+        !important;
+}
+
+
+.diagnostic-note {
+    margin:
+        12px
+        0
+        0;
+
+    color:
+        var(--muted-dark);
+
+    font-size:
+        9px;
+
     line-height:
-        1.6;
+        1.5;
+}
+
+
+/* Phase 3B placeholder */
+
+.evaluation-chart-placeholder {
+    min-height:
+        170px;
+
+    padding:
+        22px;
+}
+
+
+.evaluation-chart-placeholder h2 {
+    margin: 0;
+
+    font-size:
+        16px;
+}
+
+
+.evaluation-chart-placeholder > p:last-child {
+    margin-top:
+        8px;
+
+    color:
+        var(--muted);
+
+    font-size:
+        11px;
+
+    line-height:
+        1.5;
 }
 
 
@@ -1386,15 +1986,18 @@ input {
         grid-template-columns:
             repeat(
                 2,
-                minmax(
-                    0,
-                    1fr
-                )
+                minmax(0, 1fr)
             );
     }
 
 
     .monitor-grid {
+        grid-template-columns:
+            1fr;
+    }
+
+
+    .evaluation-detail-grid {
         grid-template-columns:
             1fr;
     }
@@ -1441,7 +2044,8 @@ input {
     }
 
 
-    .page-header {
+    .page-header,
+    .evaluation-header {
         flex-direction:
             column;
 

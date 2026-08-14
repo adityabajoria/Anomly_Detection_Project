@@ -4,11 +4,20 @@ import {
 
 
 const LABELS = {
-    random: "Random Baseline",
-    zscore: "Z-Score",
-    pca: "PCA",
-    iforest: "Isolation Forest",
-    lstm_autoencoder: "LSTM Autoencoder",
+    random:
+        "Random Baseline",
+
+    zscore:
+        "Z-Score",
+
+    pca:
+        "PCA",
+
+    iforest:
+        "Isolation Forest",
+
+    lstm_autoencoder:
+        "LSTM Autoencoder",
 };
 
 
@@ -22,12 +31,14 @@ const ORDER = [
 
 
 let machineId = null;
+
 let results = {};
+
 let selectedDetector = null;
 
 
 /* ============================================================
-   Helpers
+   Formatting
 ============================================================ */
 
 function detectorLabel(name) {
@@ -35,16 +46,22 @@ function detectorLabel(name) {
 }
 
 
-function formatMetric(value, digits = 3) {
+function formatMetric(
+    value,
+    digits = 3
+) {
     if (
         value === null ||
         value === undefined ||
-        !Number.isFinite(Number(value))
+        !Number.isFinite(
+            Number(value)
+        )
     ) {
         return "—";
     }
 
-    return Number(value).toFixed(digits);
+    return Number(value)
+        .toFixed(digits);
 }
 
 
@@ -52,12 +69,17 @@ function formatThreshold(value) {
     if (
         value === null ||
         value === undefined ||
-        !Number.isFinite(Number(value))
+        !Number.isFinite(
+            Number(value)
+        )
     ) {
         return "—";
     }
 
-    const number = Number(value);
+
+    const number =
+        Number(value);
+
 
     if (
         Math.abs(number) > 0 &&
@@ -66,28 +88,148 @@ function formatThreshold(value) {
         return number.toExponential(3);
     }
 
+
     return number.toFixed(4);
 }
 
 
-function metric(result, group, key) {
-    if (!result) {
-        return null;
+function formatSeconds(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        !Number.isFinite(
+            Number(value)
+        )
+    ) {
+        return "—";
     }
 
-    const section =
-        result[group];
 
-    if (!section) {
-        return null;
+    const number =
+        Number(value);
+
+
+    if (number < 0.001) {
+        return `${
+            (
+                number * 1000
+            ).toFixed(3)
+        } ms`;
     }
 
-    return section[key] ?? null;
+
+    return `${
+        number.toFixed(4)
+    } s`;
+}
+
+
+function formatThroughput(value) {
+    if (
+        value === null ||
+        value === undefined ||
+        !Number.isFinite(
+            Number(value)
+        )
+    ) {
+        return "—";
+    }
+
+
+    return `${
+        Math.round(
+            Number(value)
+        ).toLocaleString()
+    } pts/s`;
+}
+
+
+function metric(
+    result,
+    group,
+    key
+) {
+    return (
+        result?.[group]?.[key] ??
+        null
+    );
 }
 
 
 /* ============================================================
-   Detector Table
+   Detector Selector
+============================================================ */
+
+function getAvailableDetectors() {
+    return Object.keys(results)
+        .filter(name =>
+            ORDER.includes(name)
+        )
+        .sort(
+            (a, b) =>
+                ORDER.indexOf(a) -
+                ORDER.indexOf(b)
+        );
+}
+
+
+function renderDetectorTabs() {
+    const container =
+        document.getElementById(
+            "evaluation-detectors"
+        );
+
+
+    const detectors =
+        getAvailableDetectors();
+
+
+    container.innerHTML =
+        detectors
+            .map(detector => `
+                <button
+                    class="
+                        detector-tab
+                        ${
+                            detector ===
+                            selectedDetector
+                                ? "active"
+                                : ""
+                        }
+                    "
+                    data-detector="${detector}"
+                >
+                    ${detectorLabel(detector)}
+                </button>
+            `)
+            .join("");
+
+
+    container
+        .querySelectorAll(
+            ".detector-tab"
+        )
+        .forEach(button => {
+
+            button.onclick =
+                () => {
+
+                    selectedDetector =
+                        button.dataset.detector;
+
+
+                    renderDetectorTabs();
+
+                    renderDetectorTable();
+
+                    renderSelectedDetector();
+                };
+        });
+}
+
+
+/* ============================================================
+   Registry Table
 ============================================================ */
 
 function renderDetectorTable() {
@@ -98,15 +240,7 @@ function renderDetectorTable() {
 
 
     const detectors =
-        Object.keys(results)
-            .filter(name =>
-                ORDER.includes(name)
-            )
-            .sort(
-                (a, b) =>
-                    ORDER.indexOf(a) -
-                    ORDER.indexOf(b)
-            );
+        getAvailableDetectors();
 
 
     tbody.innerHTML =
@@ -141,12 +275,23 @@ function renderDetectorTable() {
                     );
 
 
+                const prAuc =
+                    result?.pr_auc ??
+                    null;
+
+
                 const threshold =
                     result?.threshold ??
                     null;
 
 
-                const isSelected =
+                const throughput =
+                    result
+                        ?.throughput_pts_per_sec ??
+                    null;
+
+
+                const selected =
                     detector ===
                     selectedDetector;
 
@@ -154,34 +299,50 @@ function renderDetectorTable() {
                 return `
                     <tr
                         class="${
-                            isSelected
+                            selected
                                 ? "selected"
                                 : ""
                         }"
+
                         data-detector="${detector}"
                     >
 
                         <td>
-                            <div class="detector-name">
+                            <span class="detector-name">
                                 ${detectorLabel(detector)}
-                            </div>
+                            </span>
                         </td>
+
 
                         <td class="numeric">
                             ${formatMetric(precision)}
                         </td>
 
+
                         <td class="numeric">
                             ${formatMetric(recall)}
                         </td>
+
 
                         <td class="numeric metric-strong">
                             ${formatMetric(f1)}
                         </td>
 
+
+                        <td class="numeric">
+                            ${formatMetric(prAuc)}
+                        </td>
+
+
                         <td class="numeric threshold-value">
                             ${formatThreshold(threshold)}
                         </td>
+
+
+                        <td class="numeric throughput-value">
+                            ${formatThroughput(throughput)}
+                        </td>
+
 
                         <td>
                             <span class="artifact-ready">
@@ -205,6 +366,9 @@ function renderDetectorTable() {
                     selectedDetector =
                         row.dataset.detector;
 
+
+                    renderDetectorTabs();
+
                     renderDetectorTable();
 
                     renderSelectedDetector();
@@ -214,7 +378,7 @@ function renderDetectorTable() {
 
 
 /* ============================================================
-   Selected Detector
+   Selected Artifact
 ============================================================ */
 
 function renderSelectedDetector() {
@@ -264,8 +428,50 @@ function renderSelectedDetector() {
         );
 
 
+    const prAuc =
+        result?.pr_auc ??
+        null;
+
+
     const threshold =
-        result.threshold ??
+        result?.threshold ??
+        null;
+
+
+    const meanDelay =
+        result
+            ?.detection_delay
+            ?.mean_delay ??
+        null;
+
+
+    const segmentsDetected =
+        result
+            ?.detection_delay
+            ?.segments_detected ??
+        null;
+
+
+    const segmentsTotal =
+        result
+            ?.detection_delay
+            ?.segments_total ??
+        null;
+
+
+    const fitSeconds =
+        result?.fit_seconds ??
+        null;
+
+
+    const scoreSeconds =
+        result?.score_seconds ??
+        null;
+
+
+    const throughput =
+        result
+            ?.throughput_pts_per_sec ??
         null;
 
 
@@ -292,6 +498,14 @@ function renderSelectedDetector() {
 
 
     document.getElementById(
+        "diag-f1"
+    ).textContent =
+        formatMetric(
+            honestF1
+        );
+
+
+    document.getElementById(
         "diag-precision"
     ).textContent =
         formatMetric(
@@ -308,10 +522,56 @@ function renderSelectedDetector() {
 
 
     document.getElementById(
-        "diag-f1"
+        "diag-pr-auc"
     ).textContent =
         formatMetric(
-            honestF1
+            prAuc
+        );
+
+
+    document.getElementById(
+        "diag-delay"
+    ).textContent =
+        meanDelay == null
+            ? "—"
+            : `${
+                Number(meanDelay)
+                    .toFixed(2)
+            } steps`;
+
+
+    document.getElementById(
+        "diag-segments"
+    ).textContent =
+        (
+            segmentsDetected == null ||
+            segmentsTotal == null
+        )
+            ? "—"
+            : `${segmentsDetected} / ${segmentsTotal}`;
+
+
+    document.getElementById(
+        "diag-fit-time"
+    ).textContent =
+        formatSeconds(
+            fitSeconds
+        );
+
+
+    document.getElementById(
+        "diag-score-time"
+    ).textContent =
+        formatSeconds(
+            scoreSeconds
+        );
+
+
+    document.getElementById(
+        "diag-throughput"
+    ).textContent =
+        formatThroughput(
+            throughput
         );
 
 
@@ -323,12 +583,6 @@ function renderSelectedDetector() {
         );
 
 
-    /*
-     * Point-adjusted F1 is deliberately presented as
-     * secondary diagnostic information rather than a
-     * primary serving metric.
-     */
-
     const gapElement =
         document.getElementById(
             "diag-adjustment-gap"
@@ -339,7 +593,6 @@ function renderSelectedDetector() {
         honestF1 != null &&
         adjustedF1 != null
     ) {
-
         const gap =
             Number(adjustedF1) -
             Number(honestF1);
@@ -349,7 +602,6 @@ function renderSelectedDetector() {
             `+${gap.toFixed(3)}`;
 
     } else {
-
         gapElement.textContent =
             "—";
     }
@@ -357,71 +609,7 @@ function renderSelectedDetector() {
 
 
 /* ============================================================
-   Detector Selector Pills
-============================================================ */
-
-function renderDetectorTabs() {
-    const container =
-        document.getElementById(
-            "evaluation-detectors"
-        );
-
-
-    const detectors =
-        Object.keys(results)
-            .filter(name =>
-                ORDER.includes(name)
-            )
-            .sort(
-                (a, b) =>
-                    ORDER.indexOf(a) -
-                    ORDER.indexOf(b)
-            );
-
-
-    container.innerHTML =
-        detectors
-            .map(detector => `
-                <button
-                    class="detector-tab ${
-                        detector ===
-                        selectedDetector
-                            ? "active"
-                            : ""
-                    }"
-                    data-detector="${detector}"
-                >
-                    ${detectorLabel(detector)}
-                </button>
-            `)
-            .join("");
-
-
-    container
-        .querySelectorAll(
-            ".detector-tab"
-        )
-        .forEach(button => {
-
-            button.onclick =
-                () => {
-
-                    selectedDetector =
-                        button.dataset.detector;
-
-
-                    renderDetectorTabs();
-
-                    renderDetectorTable();
-
-                    renderSelectedDetector();
-                };
-        });
-}
-
-
-/* ============================================================
-   Loading / Empty States
+   States
 ============================================================ */
 
 function setLoading() {
@@ -430,7 +618,7 @@ function setLoading() {
     ).innerHTML = `
         <tr>
             <td
-                colspan="6"
+                colspan="8"
                 class="evaluation-empty"
             >
                 Loading detector artifacts…
@@ -446,8 +634,11 @@ function showEvaluationError(message) {
     ).innerHTML = `
         <tr>
             <td
-                colspan="6"
-                class="evaluation-empty evaluation-error"
+                colspan="8"
+                class="
+                    evaluation-empty
+                    evaluation-error
+                "
             >
                 ${message}
             </td>
@@ -457,7 +648,7 @@ function showEvaluationError(message) {
 
 
 /* ============================================================
-   Public Initialization
+   Public Init
 ============================================================ */
 
 export async function initEvaluationView(
@@ -477,7 +668,6 @@ export async function initEvaluationView(
 
 
     try {
-
         results =
             await getResults(
                 machineId
@@ -485,30 +675,17 @@ export async function initEvaluationView(
 
 
         const detectors =
-            Object.keys(results)
-                .filter(name =>
-                    ORDER.includes(name)
-                )
-                .sort(
-                    (a, b) =>
-                        ORDER.indexOf(a) -
-                        ORDER.indexOf(b)
-                );
+            getAvailableDetectors();
 
 
         if (!detectors.length) {
             showEvaluationError(
-                "No detector evaluation results are available for this machine."
+                "No evaluation results are available for this machine."
             );
 
             return;
         }
 
-
-        /*
-         * Prefer PCA as the initial artifact simply to keep
-         * the initial state consistent with Live Inference.
-         */
 
         selectedDetector =
             detectors.includes("pca")

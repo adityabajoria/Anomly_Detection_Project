@@ -2,22 +2,30 @@ import {
     getMachines,
 } from "./api.js";
 
+
 import {
     initLiveView,
 } from "./live.js";
 
 
+import {
+    initEvaluationView,
+} from "./evaluation.js";
+
+
 let currentMachine = null;
 
+
+/* ============================================================
+   Startup
+============================================================ */
 
 async function init() {
     const response =
         await getMachines();
 
 
-    if (
-        !response.machines.length
-    ) {
+    if (!response.machines.length) {
         throw new Error(
             "No machines available."
         );
@@ -50,10 +58,17 @@ async function init() {
 
     machineSelect.onchange =
         async () => {
+
             currentMachine =
                 machineSelect.value;
 
+
             await initLiveView(
+                currentMachine
+            );
+
+
+            await initEvaluationView(
                 currentMachine
             );
         };
@@ -62,11 +77,27 @@ async function init() {
     setupTabs();
 
 
+    /*
+     * Initialize both views once.
+     *
+     * Evaluation stays hidden until the user clicks its tab,
+     * but its data is ready immediately.
+     */
+
     await initLiveView(
+        currentMachine
+    );
+
+
+    await initEvaluationView(
         currentMachine
     );
 }
 
+
+/* ============================================================
+   Top-Level Tabs
+============================================================ */
 
 function setupTabs() {
     const buttons =
@@ -75,58 +106,62 @@ function setupTabs() {
         );
 
 
-    buttons.forEach(
-        button => {
-            button.onclick =
-                () => {
-                    const target =
-                        button.dataset.view;
+    buttons.forEach(button => {
+
+        button.onclick =
+            () => {
+
+                const target =
+                    button.dataset.view;
 
 
-                    buttons.forEach(
-                        item =>
-                            item.classList.remove(
-                                "active"
-                            )
-                    );
-
-
-                    button.classList.add(
+                buttons.forEach(item =>
+                    item.classList.remove(
                         "active"
-                    );
+                    )
+                );
 
 
-                    document.getElementById(
-                        "live-view"
-                    ).classList.toggle(
-                        "hidden",
-                        target !== "live"
-                    );
+                button.classList.add(
+                    "active"
+                );
 
 
-                    document.getElementById(
-                        "evaluation-view"
-                    ).classList.toggle(
-                        "hidden",
-                        target !== "evaluation"
-                    );
-                };
-        }
-    );
+                document.getElementById(
+                    "live-view"
+                ).classList.toggle(
+                    "hidden",
+                    target !== "live"
+                );
+
+
+                document.getElementById(
+                    "evaluation-view"
+                ).classList.toggle(
+                    "hidden",
+                    target !== "evaluation"
+                );
+            };
+    });
 }
 
 
-init().catch(
-    error => {
-        const banner =
-            document.getElementById(
-                "error-banner"
-            );
+/* ============================================================
+   Run
+============================================================ */
 
-        banner.textContent =
-            `Initialization failed: ${error.message}`;
+init().catch(error => {
 
-        banner.style.display =
-            "block";
-    }
-);
+    const banner =
+        document.getElementById(
+            "error-banner"
+        );
+
+
+    banner.textContent =
+        `Initialization failed: ${error.message}`;
+
+
+    banner.style.display =
+        "block";
+});
