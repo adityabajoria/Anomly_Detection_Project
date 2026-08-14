@@ -4,7 +4,8 @@ from pathlib import Path
 
 import numpy as np
 
-RESULTS_DIR = Path("results")
+# Anchored to the repo root so the server works regardless of cwd.
+RESULTS_DIR = Path(__file__).resolve().parent.parent / "results"
 
 MODEL_ORDER = ["random", "zscore", "pca", "iforest", "lstm_autoencoder"]
 MODEL_LABELS = {
@@ -39,10 +40,16 @@ def inflation_table() -> list[dict]:
     """Fleet-level per-detector honest vs point-adjusted F1 and the gap."""
     per_detector: dict = {}
     for p in RESULTS_DIR.glob("machine-*.json"):
-        data = json.loads(p.read_text())
-        for det, res in data.items():
-            h = res["honest"]["f1"]
-            a = res["point_adjusted"]["f1"]
+        try:
+            payload = json.loads(p.read_text())
+        except json.JSONDecodeError:
+            continue  # one bad file shouldn't 500 the whole fleet view
+        for det, res in payload.items():
+            try:
+                h = res["honest"]["f1"]
+                a = res["point_adjusted"]["f1"]
+            except (TypeError, KeyError):
+                continue
             per_detector.setdefault(det, {"honest": [], "adjusted": []})
             per_detector[det]["honest"].append(h)
             per_detector[det]["adjusted"].append(a)

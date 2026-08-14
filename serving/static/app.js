@@ -1,147 +1,1281 @@
-const LABELS={random:"Random",zscore:"Z-Score",pca:"PCA",iforest:"Isolation Forest",
-  lstm_autoencoder:"LSTM Autoencoder"};
-const ORDER=["random","zscore","pca","iforest","lstm_autoencoder"];
-const DARK={paper_bgcolor:"rgba(0,0,0,0)",plot_bgcolor:"rgba(0,0,0,0)",
-  font:{color:"#94a3b8",family:"Inter"},margin:{l:55,r:20,t:10,b:45}};
-
-let current=null, machine=null, evt=null;
-
-async function getJSON(u){const r=await fetch(u);if(!r.ok)throw new Error(u+" "+r.status);return r.json();}
-
-async function init(){
-  const {machines}=await getJSON("/api/machines");
-  const sel=document.getElementById("machine-select");
-  sel.innerHTML=machines.map(m=>`<option>${m}</option>`).join("");
-  sel.onchange=()=>{machine=sel.value;stop();resetChart();};
-  machine=machines[0];
-  const results=await getJSON(`/api/results/${machine}`);
-  const dets=Object.keys(results).sort((a,b)=>(ORDER.indexOf(a)+1||99)-(ORDER.indexOf(b)+1||99));
-  const tabs=document.getElementById("tabs");
-  tabs.innerHTML=dets.map(d=>`<div class="tab" data-det="${d}">${LABELS[d]||d}</div>`).join("")
-    +`<div class="tab total" data-det="__total">All detectors</div>`;
-  tabs.querySelectorAll(".tab").forEach(t=>t.onclick=()=>selectTab(t.dataset.det));
-  selectTab(dets[2]||dets[0]); // default to PCA-ish
-}
-
-function selectTab(det){
-  current=det; stop();
-  document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active",t.dataset.det===det));
-  const title=det==="__total"?"All detectors — live":`${LABELS[det]||det} — live detection`;
-  document.getElementById("view-title").textContent=title;
-  resetChart();
-  updateStats();
-}
-
-function resetChart(){
-  Plotly.newPlot("chart",[{y:[],x:[],mode:"lines",line:{color:"#38bdf8",width:1.4},name:"score"},
-    {y:[],x:[],mode:"markers",marker:{color:"#ef4444",size:5},name:"flag"}],
-    {...DARK,height:420,xaxis:{title:"timestep",gridcolor:"#1e293b"},
-     yaxis:{title:"anomaly score",gridcolor:"#1e293b"},shapes:[],showlegend:false},
-    {displayModeBar:false});
-  document.getElementById("caught-num").textContent="0 / 0";
-  document.getElementById("alarm-num").textContent="0";
-  document.getElementById("score-num").textContent="–";
-  document.getElementById("progress").textContent="";
-}
-
-function stop(){
-  if(evt){evt.close();evt=null;}
-  if(typeof streaming!=="undefined") streaming=false;
-  const b=document.getElementById("play-btn");
-  b.textContent="Start stream";b.disabled=false;b.classList.remove("pulse");
-}
-
-function startStream(){
-  if(current==="__total"){startTotal();return;}
-  stop(); resetChart();
-  const b=document.getElementById("play-btn");
-  b.textContent="Stop";b.disabled=false;b.classList.add("pulse");
-
-  const xs=[],ys=[],fx=[],fy=[],shapes=[];
-  let threshold=null,nSeg=0,caught=0,alarms=0,segStart=null,inCaught=false;
-
-  const spd=document.getElementById("speed");
-  const delay=spd?(0.005+(spd.value/100)*0.06).toFixed(3):0.02;  // 5ms..65ms per step
-  evt=new EventSource(`/api/stream/${machine}/${current}?delay=${delay}`);
-  evt.onmessage=e=>{
-    const m=JSON.parse(e.data);
-    if(m.meta){threshold=m.threshold;nSeg=m.n_segments;
-      document.getElementById("caught-num").textContent=`0 / ${nSeg}`;return;}
-    if(m.done){stop();document.getElementById("progress").textContent=`done — ${xs.length} steps`;return;}
-
-    // anomaly band tracking
-    if(m.label===1&&segStart===null){segStart=m.t;inCaught=false;}
-    if(m.label===1&&m.score!==null&&threshold!==null&&m.score>=threshold&&!inCaught){
-      inCaught=true;caught++;document.getElementById("caught-num").textContent=`${caught} / ${nSeg}`;
-    }
-    if(m.label===0&&segStart!==null){
-      shapes.push({type:"rect",xref:"x",yref:"paper",x0:segStart,x1:m.t,y0:0,y1:1,
-        fillcolor:"#ef4444",opacity:0.14,line:{width:0}});segStart=null;
-    }
-    // score line + flags
-    if(m.score!==null){
-      xs.push(m.t);ys.push(m.score);
-      document.getElementById("score-num").textContent=m.score.toFixed(3);
-      if(threshold!==null&&m.score>=threshold){fx.push(m.t);fy.push(m.score);alarms++;}
-    }
-    if(m.t%2===0){
-      Plotly.update("chart",{x:[xs,fx],y:[ys,fy]},{shapes},[0,1]);
-      document.getElementById("alarm-num").textContent=alarms;
-      document.getElementById("progress").textContent=`t = ${m.t}`;
-    }
-  };
-  evt.onerror=()=>{stop();document.getElementById("progress").textContent="stream ended";};
-}
-
-// "All detectors" — stream each sequentially into overlaid faint lines
-async function startTotal(){
-  stop();resetChart();
-  const results=await getJSON(`/api/results/${machine}`);
-  const dets=Object.keys(results).sort((a,b)=>(ORDER.indexOf(a)+1||99)-(ORDER.indexOf(b)+1||99));
-  const colors=["#64748b","#38bdf8","#a78bfa","#f59e0b","#22c55e"];
-  Plotly.newPlot("chart",dets.map((d,i)=>({y:[],x:[],mode:"lines",
-    line:{color:colors[i%colors.length],width:1.2},name:LABELS[d]||d})),
-    {...DARK,height:420,xaxis:{title:"timestep",gridcolor:"#1e293b"},
-     yaxis:{title:"anomaly score",gridcolor:"#1e293b"},showlegend:true,
-     legend:{orientation:"h",y:1.1,font:{size:11}}},{displayModeBar:false});
-  const b=document.getElementById("play-btn");b.textContent="Stop";b.disabled=false;b.classList.add("pulse");
-  document.getElementById("view-desc").textContent="Every detector streamed together — compare how each responds to the same anomalies.";
-  for(let i=0;i<dets.length;i++){await streamInto(dets[i],i);}
-  stop();
-}
-function streamInto(det,idx){
-  return new Promise(res=>{
-    const xs=[],ys=[];const s=new EventSource(`/api/stream/${machine}/${det}`);
-    s.onmessage=e=>{const m=JSON.parse(e.data);
-      if(m.meta)return; if(m.done){s.close();res();return;}
-      if(m.score!==null){xs.push(m.t);ys.push(m.score);}
-      if(m.t%8===0)Plotly.update("chart",{x:[xs],y:[ys]},{},[idx]);};
-    s.onerror=()=>{s.close();res();};
-  });
-}
-
-
-async function updateStats(){
-  if(current==="__total"){
-    ["stat-honest","stat-adjusted","stat-inflation","stat-prauc"].forEach(id=>
-      document.getElementById(id).textContent="–");
-    return;
-  }
-  try{
-    const res=await getJSON(`/api/results/${machine}`);
-    const r=res[current];
-    if(!r){return;}
-    const h=r.honest.f1, a=r.point_adjusted.f1;
-    document.getElementById("stat-honest").textContent=h.toFixed(3);
-    document.getElementById("stat-adjusted").textContent=a.toFixed(3);
-    document.getElementById("stat-inflation").textContent="+"+(a-h).toFixed(3);
-    document.getElementById("stat-prauc").textContent=(r.pr_auc!=null)?r.pr_auc.toFixed(3):"–";
-  }catch(e){console.error(e);}
-}
-
-let streaming=false;
-document.getElementById("play-btn").onclick=()=>{
-  if(streaming){ streaming=false; stop(); document.getElementById("progress").textContent="stopped"; }
-  else { streaming=true; startStream(); }
+const LABELS = {
+    random: "Random Baseline",
+    zscore: "Z-Score",
+    pca: "PCA",
+    iforest: "Isolation Forest",
+    lstm_autoencoder: "LSTM Autoencoder",
 };
-init().catch(e=>console.error(e));
+
+
+const ORDER = [
+    "random",
+    "zscore",
+    "pca",
+    "iforest",
+    "lstm_autoencoder",
+];
+
+
+const WINDOW_SIZE = 150;
+
+
+const DARK = {
+
+    paper_bgcolor:
+        "rgba(0,0,0,0)",
+
+    plot_bgcolor:
+        "rgba(0,0,0,0)",
+
+    font: {
+        color: "#8b93a7",
+        family: "Inter",
+        size: 11,
+    },
+
+    margin: {
+        l: 55,
+        r: 20,
+        t: 18,
+        b: 45,
+    },
+};
+
+
+let current = null;
+let machine = null;
+
+let evt = null;
+let streaming = false;
+
+let modelThreshold = null;
+let activeThreshold = null;
+
+let manualThreshold = false;
+
+let eventsProcessed = 0;
+let alertsTriggered = 0;
+
+let eventLogCount = 0;
+
+
+/* ============================================================
+   Errors
+============================================================ */
+
+function showError(message) {
+
+    const element =
+        document.getElementById(
+            "error-banner"
+        );
+
+    element.textContent =
+        message;
+
+    element.style.display =
+        "block";
+
+    console.error(message);
+}
+
+
+function clearError() {
+
+    const element =
+        document.getElementById(
+            "error-banner"
+        );
+
+    element.style.display =
+        "none";
+
+    element.textContent =
+        "";
+}
+
+
+/* ============================================================
+   HTTP
+============================================================ */
+
+async function getJSON(url) {
+
+    const response =
+        await fetch(url);
+
+    if (!response.ok) {
+
+        let detail = "";
+
+        try {
+
+            const body =
+                await response.json();
+
+            detail =
+                body.detail || "";
+
+        } catch (_) {}
+
+
+        throw new Error(
+            `${url} → HTTP ${response.status}` +
+            `${detail ? ": " + detail : ""}`
+        );
+    }
+
+    return response.json();
+}
+
+
+/* ============================================================
+   Initialization
+============================================================ */
+
+async function init() {
+
+    const { machines } =
+        await getJSON(
+            "/api/machines"
+        );
+
+
+    if (!machines.length) {
+
+        throw new Error(
+            "No machines found."
+        );
+    }
+
+
+    const machineSelect =
+        document.getElementById(
+            "machine-select"
+        );
+
+
+    machineSelect.innerHTML =
+        machines
+            .map(machineName => (
+                `<option value="${machineName}">
+                    ${machineName}
+                </option>`
+            ))
+            .join("");
+
+
+    machineSelect.onchange = () => {
+
+        machine =
+            machineSelect.value;
+
+        loadMachine()
+            .catch(error =>
+                showError(
+                    error.message
+                )
+            );
+    };
+
+
+    machine =
+        machines[0];
+
+
+    await loadMachine();
+}
+
+
+/* ============================================================
+   Machine / Detector
+============================================================ */
+
+async function loadMachine() {
+
+    stopStream();
+    clearError();
+
+
+    const detectorSelect =
+        document.getElementById(
+            "detector-select"
+        );
+
+
+    const response =
+        await getJSON(
+            `/api/detectors/${machine}`
+        );
+
+
+    const detectors =
+        response.detectors;
+
+
+    detectors.sort((a, b) => {
+
+        const aIndex =
+            ORDER.indexOf(a);
+
+        const bIndex =
+            ORDER.indexOf(b);
+
+
+        return (
+            (aIndex === -1 ? 99 : aIndex) -
+            (bIndex === -1 ? 99 : bIndex)
+        );
+    });
+
+
+    detectorSelect.innerHTML =
+        detectors
+            .map(detector => (
+                `<option value="${detector}">
+                    ${LABELS[detector] || detector}
+                </option>`
+            ))
+            .join("");
+
+
+    detectorSelect.onchange =
+        () => {
+            selectDetector(
+                detectorSelect.value
+            );
+        };
+
+
+    const firstDetector =
+        detectors.includes("pca")
+            ? "pca"
+            : detectors[0];
+
+
+    detectorSelect.value =
+        firstDetector;
+
+
+    selectDetector(
+        firstDetector
+    );
+}
+
+
+/* ============================================================
+   Detector Selection
+============================================================ */
+
+function selectDetector(detector) {
+
+    current =
+        detector;
+
+
+    manualThreshold =
+        false;
+
+
+    modelThreshold =
+        null;
+
+
+    activeThreshold =
+        null;
+
+
+    stopStream();
+
+    resetDashboard();
+
+    resetChart();
+
+
+    const label =
+        LABELS[detector] ||
+        detector;
+
+
+    document.getElementById(
+        "view-title"
+    ).textContent =
+        `${label} anomaly score`;
+
+
+    document.getElementById(
+        "service-machine"
+    ).textContent =
+        machine;
+
+
+    document.getElementById(
+        "service-detector"
+    ).textContent =
+        label;
+}
+
+
+/* ============================================================
+   Dashboard Reset
+============================================================ */
+
+function resetDashboard() {
+
+    eventsProcessed = 0;
+
+    alertsTriggered = 0;
+
+    eventLogCount = 0;
+
+
+    document.getElementById(
+        "k-events"
+    ).textContent =
+        "0";
+
+
+    document.getElementById(
+        "k-alerts"
+    ).textContent =
+        "0";
+
+
+    document.getElementById(
+        "k-latency"
+    ).textContent =
+        "—";
+
+
+    document.getElementById(
+        "event-count"
+    ).textContent =
+        "0 events";
+
+
+    document.getElementById(
+        "event-list"
+    ).innerHTML = `
+        <div class="empty-state">
+            Inference events will appear here when the stream starts.
+        </div>
+    `;
+
+
+    setLive(false);
+}
+
+
+/* ============================================================
+   Live State
+============================================================ */
+
+function setLive(isLive) {
+
+    const badge =
+        document.getElementById(
+            "stream-badge"
+        );
+
+    const label =
+        document.getElementById(
+            "live-label"
+        );
+
+    const statusValue =
+        document.getElementById(
+            "k-stream"
+        );
+
+    const serviceStream =
+        document.getElementById(
+            "service-stream"
+        );
+
+
+    if (isLive) {
+
+        badge.classList.add(
+            "live"
+        );
+
+        label.textContent =
+            "Streaming";
+
+        statusValue.textContent =
+            "LIVE";
+
+        statusValue.classList.add(
+            "live"
+        );
+
+        serviceStream.textContent =
+            "Connected";
+
+    } else {
+
+        badge.classList.remove(
+            "live"
+        );
+
+        label.textContent =
+            "Idle";
+
+        statusValue.textContent =
+            "IDLE";
+
+        statusValue.classList.remove(
+            "live"
+        );
+
+        serviceStream.textContent =
+            "Disconnected";
+    }
+}
+
+
+/* ============================================================
+   Chart
+============================================================ */
+
+function getThresholdShape() {
+
+    if (activeThreshold === null) {
+        return [];
+    }
+
+
+    return [
+        {
+            type: "line",
+
+            xref: "paper",
+
+            x0: 0,
+            x1: 1,
+
+            yref: "y",
+
+            y0: activeThreshold,
+            y1: activeThreshold,
+
+            line: {
+                color: "#64748b",
+                width: 1,
+                dash: "dot",
+            },
+        },
+    ];
+}
+
+
+function baseLayout() {
+
+    return {
+
+        ...DARK,
+
+        height:
+            410,
+
+        xaxis: {
+
+            title: {
+                text: "timestep",
+
+                font: {
+                    size: 10,
+                    color: "#5f6676",
+                },
+            },
+
+            gridcolor:
+                "#151820",
+
+            zeroline:
+                false,
+
+            tickfont: {
+                size: 10,
+            },
+        },
+
+
+        yaxis: {
+
+            title: {
+                text: "anomaly score",
+
+                font: {
+                    size: 10,
+                    color: "#5f6676",
+                },
+            },
+
+            gridcolor:
+                "#151820",
+
+            zeroline:
+                false,
+
+            tickfont: {
+                size: 10,
+            },
+        },
+
+
+        shapes:
+            getThresholdShape(),
+
+        showlegend:
+            false,
+
+        hovermode:
+            "x unified",
+    };
+}
+
+
+function resetChart() {
+
+    Plotly.newPlot(
+
+        "chart",
+
+        [
+
+            {
+                x: [],
+                y: [],
+
+                mode:
+                    "lines",
+
+                name:
+                    "Anomaly score",
+
+                line: {
+                    color:
+                        "#22d3ee",
+
+                    width:
+                        1.7,
+                },
+
+                hovertemplate:
+                    "score: %{y:.4f}<extra></extra>",
+            },
+
+
+            {
+                x: [],
+                y: [],
+
+                mode:
+                    "markers",
+
+                name:
+                    "Alert",
+
+                marker: {
+                    color:
+                        "#f43f5e",
+
+                    size:
+                        7,
+                },
+
+                hovertemplate:
+                    "ALERT<br>score: %{y:.4f}<extra></extra>",
+            },
+
+        ],
+
+        baseLayout(),
+
+        {
+            displayModeBar:
+                false,
+
+            responsive:
+                true,
+        }
+    );
+
+
+    document.getElementById(
+        "status"
+    ).textContent =
+        "Waiting for stream";
+}
+
+
+/* ============================================================
+   Rolling Window
+============================================================ */
+
+function updateRollingWindow(timestep) {
+
+    if (timestep < WINDOW_SIZE) {
+        return;
+    }
+
+
+    const start =
+        timestep -
+        WINDOW_SIZE;
+
+
+    Plotly.relayout(
+        "chart",
+        {
+            "xaxis.range":
+                [
+                    start,
+                    timestep + 5
+                ],
+        }
+    );
+}
+
+
+/* ============================================================
+   Event Log
+============================================================ */
+
+function addInferenceEvent(
+    timestep,
+    score,
+    isAlert
+) {
+
+    const list =
+        document.getElementById(
+            "event-list"
+        );
+
+
+    eventLogCount += 1;
+
+
+    if (eventLogCount === 1) {
+        list.innerHTML = "";
+    }
+
+
+    const row =
+        document.createElement(
+            "div"
+        );
+
+
+    row.className =
+        isAlert
+            ? "event-row alert-row"
+            : "event-row";
+
+
+    row.innerHTML = `
+
+        <span>
+            t = ${timestep}
+        </span>
+
+        <span class="event-score">
+            ${score.toFixed(4)}
+        </span>
+
+        <span class="event-status ${
+            isAlert
+                ? "anomaly"
+                : "normal"
+        }">
+            ${
+                isAlert
+                    ? "ANOMALY"
+                    : "NORMAL"
+            }
+        </span>
+    `;
+
+
+    list.prepend(row);
+
+
+    while (
+        list.children.length > 8
+    ) {
+
+        list.removeChild(
+            list.lastChild
+        );
+    }
+
+
+    document.getElementById(
+        "event-count"
+    ).textContent =
+        `${eventLogCount.toLocaleString()} events`;
+}
+
+
+/* ============================================================
+   Threshold
+============================================================ */
+
+function updateThresholdUI() {
+
+    const input =
+        document.getElementById(
+            "threshold-input"
+        );
+
+    const defaultLabel =
+        document.getElementById(
+            "threshold-default"
+        );
+
+
+    if (activeThreshold !== null) {
+
+        input.value =
+            activeThreshold.toFixed(4);
+    }
+
+
+    if (modelThreshold !== null) {
+
+        defaultLabel.textContent =
+            `Model default: ${modelThreshold.toFixed(4)}`;
+
+    } else {
+
+        defaultLabel.textContent =
+            "Model default: —";
+    }
+}
+
+
+function setManualThreshold() {
+
+    const input =
+        document.getElementById(
+            "threshold-input"
+        );
+
+
+    const value =
+        Number(input.value);
+
+
+    if (
+        Number.isNaN(value)
+    ) {
+
+        showError(
+            "Threshold must be a valid number."
+        );
+
+        return;
+    }
+
+
+    clearError();
+
+
+    activeThreshold =
+        value;
+
+
+    manualThreshold =
+        true;
+
+
+    Plotly.relayout(
+        "chart",
+        {
+            shapes:
+                getThresholdShape(),
+        }
+    );
+
+
+    /*
+     * Restart so all alerts in this replay use
+     * one consistent threshold.
+     */
+
+    startStream();
+}
+
+
+function resetThreshold() {
+
+    if (
+        modelThreshold === null
+    ) {
+
+        return;
+    }
+
+
+    activeThreshold =
+        modelThreshold;
+
+
+    manualThreshold =
+        false;
+
+
+    updateThresholdUI();
+
+
+    Plotly.relayout(
+        "chart",
+        {
+            shapes:
+                getThresholdShape(),
+        }
+    );
+
+
+    startStream();
+}
+
+
+/* ============================================================
+   Stop Stream
+============================================================ */
+
+function stopStream() {
+
+    if (evt) {
+
+        evt.close();
+
+        evt = null;
+    }
+
+
+    streaming =
+        false;
+
+
+    const playButton =
+        document.getElementById(
+            "play-btn"
+        );
+
+
+    playButton.innerHTML =
+        "▶";
+
+
+    playButton.classList.remove(
+        "running"
+    );
+
+
+    playButton.title =
+        "Start stream";
+
+
+    setLive(false);
+}
+
+
+/* ============================================================
+   Start Stream
+============================================================ */
+
+function startStream() {
+
+    stopStream();
+
+    resetDashboard();
+
+    resetChart();
+
+    clearError();
+
+
+    streaming =
+        true;
+
+
+    const playButton =
+        document.getElementById(
+            "play-btn"
+        );
+
+
+    playButton.innerHTML =
+        "Ⅱ";
+
+
+    playButton.classList.add(
+        "running"
+    );
+
+
+    playButton.title =
+        "Stop stream";
+
+
+    document.getElementById(
+        "restart-btn"
+    ).disabled =
+        false;
+
+
+    setLive(true);
+
+
+    const delay =
+        document.getElementById(
+            "speed-select"
+        ).value;
+
+
+    const buffer = {
+
+        x: [],
+        y: [],
+
+        flaggedX: [],
+        flaggedY: [],
+    };
+
+
+    let lastTimestep = 0;
+
+    let done = false;
+
+
+    function flush() {
+
+        if (
+            !streaming &&
+            !done
+        ) {
+            return;
+        }
+
+
+        if (
+            buffer.x.length
+        ) {
+
+            Plotly.extendTraces(
+
+                "chart",
+
+                {
+                    x: [
+                        buffer.x,
+                        buffer.flaggedX,
+                    ],
+
+                    y: [
+                        buffer.y,
+                        buffer.flaggedY,
+                    ],
+                },
+
+                [0, 1],
+
+                WINDOW_SIZE
+            );
+
+
+            buffer.x = [];
+            buffer.y = [];
+
+            buffer.flaggedX = [];
+            buffer.flaggedY = [];
+
+
+            updateRollingWindow(
+                lastTimestep
+            );
+
+
+            document.getElementById(
+                "status"
+            ).textContent =
+                done
+                    ? `Replay complete · ${lastTimestep + 1} events`
+                    : `Processing t = ${lastTimestep}`;
+        }
+
+
+        if (!done) {
+
+            requestAnimationFrame(
+                flush
+            );
+        }
+    }
+
+
+    evt =
+        new EventSource(
+            `/api/stream/${machine}/${current}?delay=${delay}`
+        );
+
+
+    evt.onmessage =
+        event => {
+
+            const message =
+                JSON.parse(
+                    event.data
+                );
+
+
+            /*
+             * Stream metadata.
+             */
+
+            if (
+                message.meta
+            ) {
+
+                modelThreshold =
+                    message.threshold;
+
+
+                /*
+                 * Only overwrite the active threshold
+                 * if the user has not manually selected one.
+                 */
+
+                if (
+                    !manualThreshold
+                ) {
+
+                    activeThreshold =
+                        modelThreshold;
+                }
+
+
+                updateThresholdUI();
+
+
+                document.getElementById(
+                    "alert-footer"
+                ).textContent =
+                    `${message.n_segments} true anomaly segments`;
+
+
+                Plotly.relayout(
+                    "chart",
+                    {
+                        shapes:
+                            getThresholdShape(),
+                    }
+                );
+
+
+                requestAnimationFrame(
+                    flush
+                );
+
+                return;
+            }
+
+
+            if (
+                message.error
+            ) {
+
+                stopStream();
+
+
+                showError(
+                    `Stream error: ${message.error}`
+                );
+
+
+                return;
+            }
+
+
+            if (
+                message.done
+            ) {
+
+                done = true;
+
+                streaming = false;
+
+
+                stopStream();
+
+                flush();
+
+                return;
+            }
+
+
+            lastTimestep =
+                message.t;
+
+
+            eventsProcessed += 1;
+
+
+            document.getElementById(
+                "k-events"
+            ).textContent =
+                eventsProcessed.toLocaleString();
+
+
+            /*
+             * LSTM warm-up can emit null.
+             */
+
+            if (
+                message.score === null
+            ) {
+
+                return;
+            }
+
+
+            const isAlert =
+                activeThreshold !== null &&
+                message.score >=
+                    activeThreshold;
+
+
+            buffer.x.push(
+                message.t
+            );
+
+
+            buffer.y.push(
+                message.score
+            );
+
+
+            if (isAlert) {
+
+                buffer.flaggedX.push(
+                    message.t
+                );
+
+
+                buffer.flaggedY.push(
+                    message.score
+                );
+
+
+                alertsTriggered += 1;
+
+
+                document.getElementById(
+                    "k-alerts"
+                ).textContent =
+                    alertsTriggered.toLocaleString();
+            }
+
+
+            addInferenceEvent(
+                message.t,
+                message.score,
+                isAlert
+            );
+        };
+
+
+    evt.onerror =
+        () => {
+
+            stopStream();
+
+
+            if (!done) {
+
+                showError(
+                    "Stream disconnected — check the uvicorn server logs."
+                );
+            }
+        };
+}
+
+
+/* ============================================================
+   Controls
+============================================================ */
+
+document.getElementById(
+    "play-btn"
+).onclick =
+    () => {
+
+        if (streaming) {
+
+            stopStream();
+
+        } else {
+
+            startStream();
+        }
+    };
+
+
+document.getElementById(
+    "restart-btn"
+).onclick =
+    () => {
+
+        startStream();
+    };
+
+
+document.getElementById(
+    "threshold-apply"
+).onclick =
+    () => {
+
+        setManualThreshold();
+    };
+
+
+document.getElementById(
+    "threshold-reset"
+).onclick =
+    () => {
+
+        resetThreshold();
+    };
+
+
+document.getElementById(
+    "threshold-input"
+).addEventListener(
+    "keydown",
+    event => {
+
+        if (
+            event.key === "Enter"
+        ) {
+
+            setManualThreshold();
+        }
+    }
+);
+
+
+/* ============================================================
+   Startup
+============================================================ */
+
+init()
+    .catch(error =>
+        showError(
+            "Initialization failed: " +
+            error.message
+        )
+    );
