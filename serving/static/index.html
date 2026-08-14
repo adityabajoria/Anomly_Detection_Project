@@ -1,8 +1,15 @@
 <!doctype html>
+
 <html lang="en">
+
 <head>
+
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1"
+    >
 
     <title>Sentinel</title>
 
@@ -11,46 +18,62 @@
         rel="stylesheet"
     >
 
-    <link rel="stylesheet" href="/static/styles.css">
+    <link
+        rel="stylesheet"
+        href="/static/styles.css"
+    >
 
-    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script
+        src="https://cdn.plot.ly/plotly-2.35.2.min.js"
+    ></script>
+
 </head>
+
 
 <body>
 
 <div class="app">
 
+    <!-- =====================================================
+         Sidebar
+    ====================================================== -->
+
     <aside class="sidebar">
 
-        <div class="sidebar-top">
+        <div>
 
             <div class="brand">
                 Sentinel<span>.</span>
             </div>
 
             <p class="brand-subtitle">
-                online anomaly detection
+                streaming ML inference
             </p>
 
+
             <div class="sidebar-field">
-                <label for="machine-select">Machine</label>
-                <select id="machine-select"></select>
+
+                <label for="machine-select">
+                    Machine
+                </label>
+
+                <select
+                    id="machine-select"
+                ></select>
+
             </div>
 
-            <div class="sidebar-field">
-                <label for="detector-select">Detector</label>
-                <select id="detector-select"></select>
-            </div>
 
             <div class="sidebar-field">
-                <label for="speed-select">Replay Speed</label>
 
-                <select id="speed-select">
-                    <option value="0.05">1x</option>
-                    <option value="0.02" selected>2x</option>
-                    <option value="0.005">5x</option>
-                    <option value="0">Max</option>
-                </select>
+                <label for="model-select">
+                    Active Model
+                </label>
+
+                <select
+                    id="model-select"
+                ></select>
+
             </div>
 
         </div>
@@ -59,13 +82,22 @@
         <div class="sidebar-footer">
 
             <div class="sidebar-system-row">
-                <span class="system-indicator"></span>
-                <span>Inference service online</span>
+
+                <span
+                    class="system-indicator"
+                ></span>
+
+                <span>
+                    Inference service online
+                </span>
+
             </div>
 
             <p>
-                Telemetry is scored point-by-point using pre-fitted
-                detectors served through FastAPI and streamed over SSE.
+                Persistent telemetry is routed through
+                dynamically selected anomaly detectors
+                and streamed to the observability client
+                over Server-Sent Events.
             </p>
 
         </div>
@@ -73,395 +105,564 @@
     </aside>
 
 
+    <!-- =====================================================
+         Main
+    ====================================================== -->
+
     <main class="main">
 
-        <header class="page-header">
+        <nav class="top-tabs">
 
-            <div>
-                <p class="eyebrow">INFERENCE MONITOR</p>
+            <button
+                class="top-tab active"
+                data-view="live"
+            >
+                Live Inference
+            </button>
 
-                <h1>Telemetry Stream</h1>
+            <button
+                class="top-tab"
+                data-view="evaluation"
+            >
+                Model Evaluation
+            </button>
 
-                <p class="header-description">
-                    Real-time anomaly scoring for multivariate machine telemetry.
-                </p>
-            </div>
-
-
-            <div class="stream-badge" id="stream-badge">
-                <span class="stream-dot"></span>
-                <span id="live-label">Idle</span>
-            </div>
-
-        </header>
+        </nav>
 
 
-        <div id="error-banner"></div>
+        <div
+            id="error-banner"
+        ></div>
 
 
-        <section class="metrics">
+        <!-- =================================================
+             LIVE INFERENCE VIEW
+        ================================================== -->
 
-            <article class="metric-card">
+        <section
+            id="live-view"
+        >
 
-                <div class="metric-header">
-                    Stream Status
-                </div>
-
-                <div
-                    class="metric-value status-value"
-                    id="k-stream"
-                >
-                    IDLE
-                </div>
-
-                <div class="metric-footer">
-                    SSE connection
-                </div>
-
-            </article>
-
-
-            <article class="metric-card">
-
-                <div class="metric-header">
-                    Events Processed
-                </div>
-
-                <div
-                    class="metric-value"
-                    id="k-events"
-                >
-                    0
-                </div>
-
-                <div class="metric-footer">
-                    Current replay
-                </div>
-
-            </article>
-
-
-            <article class="metric-card">
-
-                <div class="metric-header">
-                    Inference Latency
-                </div>
-
-                <div
-                    class="metric-value"
-                    id="k-latency"
-                >
-                    —
-                </div>
-
-                <div class="metric-footer">
-                    P95 · coming next
-                </div>
-
-            </article>
-
-
-            <article class="metric-card">
-
-                <div class="metric-header">
-                    Alerts Triggered
-                </div>
-
-                <div
-                    class="metric-value alert-value"
-                    id="k-alerts"
-                >
-                    0
-                </div>
-
-                <div
-                    class="metric-footer"
-                    id="alert-footer"
-                >
-                    Threshold crossings
-                </div>
-
-            </article>
-
-        </section>
-
-
-        <section class="panel chart-panel">
-
-            <div class="panel-header">
+            <header class="page-header">
 
                 <div>
 
-                    <p class="panel-eyebrow">
-                        LIVE INFERENCE
+                    <p class="eyebrow">
+                        INFERENCE MONITOR
                     </p>
 
-                    <h2 id="view-title">
-                        Anomaly Score
-                    </h2>
+                    <h1>
+                        Telemetry Stream
+                    </h1>
 
-                    <p class="panel-description">
-                        Showing the latest 150 inference events.
-                        Scores above the active threshold are emitted as alerts.
+                    <p class="header-description">
+                        Persistent online scoring with
+                        dynamically routed anomaly detectors.
                     </p>
-
-                </div>
-
-
-                <div class="chart-actions">
-
-                    <button
-                        class="action-button primary"
-                        id="play-btn"
-                        title="Start stream"
-                    >
-                        ▶
-                    </button>
-
-                    <button
-                        class="action-button"
-                        id="restart-btn"
-                        title="Restart stream"
-                        disabled
-                    >
-                        ↻
-                    </button>
-
-                </div>
-
-            </div>
-
-
-            <div class="chart-container">
-                <div id="chart"></div>
-            </div>
-
-
-            <div class="chart-footer">
-
-                <div class="legend">
-
-                    <span class="legend-item">
-                        <span class="legend-line score"></span>
-                        anomaly score
-                    </span>
-
-                    <span class="legend-item">
-                        <span class="legend-dot alert"></span>
-                        alert
-                    </span>
-
-                    <span class="legend-item">
-                        <span class="legend-line threshold"></span>
-                        active threshold
-                    </span>
 
                 </div>
 
 
                 <div
-                    class="chart-status"
-                    id="status"
+                    class="stream-badge"
+                    id="stream-badge"
                 >
-                    Waiting for stream
+
+                    <span class="stream-dot"></span>
+
+                    <span id="live-label">
+                        Idle
+                    </span>
+
                 </div>
 
-            </div>
-
-        </section>
+            </header>
 
 
-        <section class="monitor-grid">
+            <!-- KPI ROW -->
 
-            <article class="panel monitor-panel">
+            <section class="metrics">
 
-                <div class="panel-header compact">
+                <article class="metric-card">
+
+                    <div class="metric-header">
+                        Stream Status
+                    </div>
+
+                    <div
+                        class="metric-value status-value"
+                        id="k-stream"
+                    >
+                        IDLE
+                    </div>
+
+                    <div class="metric-footer">
+                        SSE connection
+                    </div>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <div class="metric-header">
+                        Events Processed
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="k-events"
+                    >
+                        0
+                    </div>
+
+                    <div class="metric-footer">
+                        Current session
+                    </div>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <div class="metric-header">
+                        P95 Inference Latency
+                    </div>
+
+                    <div
+                        class="metric-value"
+                        id="k-latency"
+                    >
+                        —
+                    </div>
+
+                    <div class="metric-footer">
+                        Last 100 inferences
+                    </div>
+
+                </article>
+
+
+                <article class="metric-card">
+
+                    <div class="metric-header">
+                        Alerts
+                    </div>
+
+                    <div
+                        class="metric-value alert-value"
+                        id="k-alerts"
+                    >
+                        0
+                    </div>
+
+                    <div class="metric-footer">
+                        Threshold crossings
+                    </div>
+
+                </article>
+
+            </section>
+
+
+            <!-- LIVE GRAPH -->
+
+            <section class="panel chart-panel">
+
+                <div class="panel-header">
 
                     <div>
+
                         <p class="panel-eyebrow">
-                            EVENT LOG
+                            LIVE INFERENCE
                         </p>
 
-                        <h2>
-                            Recent Inference Events
+                        <h2 id="chart-title">
+                            Live inference
                         </h2>
+
+                        <p class="panel-description">
+                            Scores are normalized against each model's
+                            calibrated threshold so multiple detectors
+                            can share one continuous timeline.
+                        </p>
+
                     </div>
+
+
+                    <div class="chart-actions">
+
+                        <button
+                            class="action-button primary"
+                            id="play-btn"
+                            title="Start / pause stream"
+                        >
+                            ▶
+                        </button>
+
+                        <button
+                            class="action-button"
+                            id="restart-btn"
+                            title="Restart telemetry session"
+                        >
+                            ↻
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="chart-container">
+
+                    <div id="chart"></div>
+
+                </div>
+
+
+                <div class="chart-footer">
+
+                    <div class="legend">
+
+                        <span class="legend-item">
+
+                            <span
+                                class="legend-line score"
+                            ></span>
+
+                            normalized score
+
+                        </span>
+
+
+                        <span class="legend-item">
+
+                            <span
+                                class="legend-dot alert"
+                            ></span>
+
+                            alert
+
+                        </span>
+
+
+                        <span class="legend-item">
+
+                            <span
+                                class="legend-line threshold"
+                            ></span>
+
+                            decision boundary = 1.0
+
+                        </span>
+
+                    </div>
+
 
                     <span
-                        class="event-count"
-                        id="event-count"
+                        class="chart-status"
+                        id="chart-status"
                     >
-                        0 events
+                        Waiting for stream
                     </span>
 
                 </div>
 
-
-                <div class="event-table-header">
-                    <span>Timestep</span>
-                    <span>Score</span>
-                    <span>Status</span>
-                </div>
+            </section>
 
 
-                <div
-                    class="event-list"
-                    id="event-list"
-                >
+            <!-- LOWER PANELS -->
 
-                    <div class="empty-state">
-                        Inference events will appear here when the stream starts.
-                    </div>
-
-                </div>
-
-            </article>
+            <section class="monitor-grid">
 
 
-            <article class="panel monitor-panel">
+                <!-- EVENT LOG -->
 
-                <div class="panel-header compact">
+                <article class="panel monitor-panel">
 
-                    <div>
-                        <p class="panel-eyebrow">
-                            SERVICE
-                        </p>
+                    <div class="panel-header compact">
 
-                        <h2>
-                            Inference Service
-                        </h2>
-                    </div>
+                        <div>
 
-                    <span class="service-health">
-                        <span></span>
-                        Healthy
-                    </span>
+                            <p class="panel-eyebrow">
+                                EVENT LOG
+                            </p>
 
-                </div>
+                            <h2>
+                                Recent Inference Events
+                            </h2>
 
+                        </div>
 
-                <div class="service-list">
-
-                    <div class="service-row">
-                        <span class="service-label">
-                            Machine
-                        </span>
 
                         <span
-                            class="service-value"
-                            id="service-machine"
+                            class="event-count"
+                            id="event-count"
                         >
-                            —
-                        </span>
-                    </div>
-
-
-                    <div class="service-row">
-
-                        <span class="service-label">
-                            Detector
-                        </span>
-
-                        <span
-                            class="service-value"
-                            id="service-detector"
-                        >
-                            —
+                            0 events
                         </span>
 
                     </div>
 
 
-                    <div class="service-row">
+                    <div class="event-table-header">
 
-                        <span class="service-label">
-                            Model status
-                        </span>
+                        <span>Timestep</span>
 
-                        <span class="service-value positive">
-                            Loaded
+                        <span>Score</span>
+
+                        <span>Model</span>
+
+                        <span>Status</span>
+
+                    </div>
+
+
+                    <div
+                        class="event-list"
+                        id="event-list"
+                    >
+
+                        <div class="empty-state">
+                            Inference events will appear here
+                            when the stream starts.
+                        </div>
+
+                    </div>
+
+                </article>
+
+
+                <!-- SERVICE PANEL -->
+
+                <article class="panel monitor-panel">
+
+                    <div class="panel-header compact">
+
+                        <div>
+
+                            <p class="panel-eyebrow">
+                                SERVICE
+                            </p>
+
+                            <h2>
+                                Inference Service
+                            </h2>
+
+                        </div>
+
+
+                        <span class="service-health">
+
+                            <span></span>
+
+                            Healthy
+
                         </span>
 
                     </div>
 
 
-                    <div class="service-row">
+                    <div class="service-list">
 
-                        <span class="service-label">
-                            Stream
-                        </span>
+                        <div class="service-row">
 
-                        <span
-                            class="service-value"
-                            id="service-stream"
-                        >
-                            Disconnected
-                        </span>
+                            <span class="service-label">
+                                Machine
+                            </span>
 
-                    </div>
+                            <span
+                                class="service-value"
+                                id="service-machine"
+                            >
+                                —
+                            </span>
+
+                        </div>
 
 
-                    <div class="service-row threshold-row">
+                        <div class="service-row">
 
-                        <div class="threshold-meta">
+                            <span class="service-label">
+                                Active model
+                            </span>
+
+                            <span
+                                class="service-value"
+                                id="service-model"
+                            >
+                                —
+                            </span>
+
+                        </div>
+
+
+                        <div class="service-row">
+
+                            <span class="service-label">
+                                Model status
+                            </span>
+
+                            <span class="service-value positive">
+                                Loaded
+                            </span>
+
+                        </div>
+
+
+                        <div class="service-row">
+
+                            <span class="service-label">
+                                Stream
+                            </span>
+
+                            <span
+                                class="service-value"
+                                id="service-stream"
+                            >
+                                Disconnected
+                            </span>
+
+                        </div>
+
+
+                        <div class="service-row">
+
+                            <span class="service-label">
+                                Threshold policy
+                            </span>
+
+                            <span
+                                class="service-value"
+                                id="service-threshold-policy"
+                            >
+                                —
+                            </span>
+
+                        </div>
+
+
+                        <div class="service-row">
 
                             <span class="service-label">
                                 Active threshold
                             </span>
 
                             <span
-                                class="threshold-default"
-                                id="threshold-default"
+                                class="service-value mono"
+                                id="service-threshold"
                             >
-                                Model default: —
+                                —
                             </span>
 
                         </div>
 
 
-                        <div class="threshold-control">
+                        <div class="service-row">
 
-                            <input
-                                type="number"
-                                id="threshold-input"
-                                step="0.001"
-                                placeholder="—"
-                            >
+                            <span class="service-label">
+                                P95 latency
+                            </span>
 
-                            <button
-                                id="threshold-apply"
-                                class="small-button"
+                            <span
+                                class="service-value mono"
+                                id="service-p95"
                             >
-                                Apply
-                            </button>
-
-                            <button
-                                id="threshold-reset"
-                                class="small-button secondary"
-                            >
-                                Reset
-                            </button>
+                                —
+                            </span>
 
                         </div>
 
+
+                        <div class="service-row">
+
+                            <span class="service-label">
+                                Transport
+                            </span>
+
+                            <span class="service-value">
+                                Server-Sent Events
+                            </span>
+
+                        </div>
+
+
+                        <!-- ADVANCED THRESHOLD -->
+
+                        <details class="advanced-settings">
+
+                            <summary>
+                                Advanced threshold override
+                            </summary>
+
+
+                            <div class="threshold-control">
+
+                                <input
+                                    id="threshold-input"
+                                    type="number"
+                                    step="any"
+                                    placeholder="Enter override"
+                                >
+
+                                <button
+                                    id="threshold-apply"
+                                    class="small-button"
+                                >
+                                    Apply
+                                </button>
+
+                                <button
+                                    id="threshold-reset"
+                                    class="small-button secondary"
+                                >
+                                    Reset
+                                </button>
+
+                            </div>
+
+                            <p class="advanced-help">
+                                Sentinel automatically uses each detector's
+                                calibrated threshold. Override only for testing.
+                            </p>
+
+                        </details>
+
                     </div>
 
+                </article>
 
-                    <div class="service-row">
+            </section>
 
-                        <span class="service-label">
-                            Transport
-                        </span>
+        </section>
 
-                        <span class="service-value">
-                            Server-Sent Events
-                        </span>
 
-                    </div>
+        <!-- =================================================
+             MODEL EVALUATION PLACEHOLDER
+        ================================================== -->
 
-                </div>
+        <section
+            id="evaluation-view"
+            class="hidden"
+        >
 
-            </article>
+            <div class="evaluation-placeholder">
+
+                <p class="eyebrow">
+                    MODEL EVALUATION
+                </p>
+
+                <h1>
+                    Detector Evaluation
+                </h1>
+
+                <p>
+                    Offline detector comparison, threshold
+                    calibration and ground-truth metrics will
+                    be added in Phase 3.
+                </p>
+
+            </div>
 
         </section>
 
@@ -470,7 +671,11 @@
 </div>
 
 
-<script src="/static/app.js"></script>
+<script
+    type="module"
+    src="/static/app.js"
+></script>
 
 </body>
+
 </html>
