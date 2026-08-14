@@ -75,7 +75,7 @@ class LSTMAutoencoderDetector(BaseDetector):
         train = np.asarray(train, dtype=np.float32)
         windows = self._make_windows(train)
 
-        self._n_features = windows.shape[1]
+        self._n_features = train.shape[1]
 
         # Last 15% used for validation
         split = int(len(windows) * 0.85)
