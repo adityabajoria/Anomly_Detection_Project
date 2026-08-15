@@ -792,8 +792,88 @@ def session_stream(
 # ============================================================
 
 @app.get(
-    "/api/stream/{machine_id}/{detector}"
+    "/api/evaluation/{machine_id}/{detector}"
 )
+def evaluation_trace(
+    machine_id: str,
+    detector: str,
+):
+    """
+    Return the saved offline score trace for one detector.
+
+    Ground-truth labels are exposed only through the
+    Model Diagnostics API, not Live Inference.
+    """
+
+    score_path = (
+        SCORES_DIR /
+        f"{machine_id}_{detector}.npz"
+    )
+
+    if not score_path.exists():
+        raise HTTPException(
+            404,
+            (
+                f"No evaluation trace available for "
+                f"{machine_id}/{detector}"
+            ),
+        )
+
+    npz = np.load(score_path)
+
+    if (
+        "scores" not in npz.files
+        or "labels" not in npz.files
+    ):
+        raise HTTPException(
+            500,
+            (
+                f"Evaluation artifact "
+                f"{score_path.name} is missing "
+                f"scores or labels"
+            ),
+        )
+
+    scores = np.asarray(
+        npz["scores"],
+        dtype=float,
+    )
+
+    labels = np.asarray(
+        npz["labels"],
+        dtype=int,
+    )
+
+    if len(scores) != len(labels):
+        raise HTTPException(
+            500,
+            (
+                f"Score/label length mismatch for "
+                f"{machine_id}/{detector}"
+            ),
+        )
+
+    if "threshold" in npz.files:
+        threshold = float(
+            npz["threshold"]
+        )
+    else:
+        threshold, _ = (
+            _resolve_threshold(
+                machine_id,
+                detector,
+            )
+        )
+
+    return {
+        "machine_id": machine_id,
+        "detector": detector,
+        "threshold": threshold,
+        "scores": scores.tolist(),
+        "labels": labels.tolist(),
+        "n_points": len(scores),
+    }
+
 def stream(
     machine_id: str,
     detector: str,

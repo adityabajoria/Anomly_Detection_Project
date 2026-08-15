@@ -1,5 +1,6 @@
 import {
     getResults,
+    getEvaluationTrace,
 } from "./api.js";
 
 
@@ -157,7 +158,7 @@ function metric(
 
 
 /* ============================================================
-   Detector Selector
+   Available Detectors
 ============================================================ */
 
 function getAvailableDetectors() {
@@ -172,6 +173,32 @@ function getAvailableDetectors() {
         );
 }
 
+
+/* ============================================================
+   Detector Selection
+============================================================ */
+
+async function selectDetector(
+    detector
+) {
+    selectedDetector =
+        detector;
+
+
+    renderDetectorTabs();
+
+    renderDetectorTable();
+
+    renderSelectedDetector();
+
+
+    await renderEvaluationChart();
+}
+
+
+/* ============================================================
+   Detector Selector
+============================================================ */
 
 function renderDetectorTabs() {
     const container =
@@ -212,17 +239,11 @@ function renderDetectorTabs() {
         .forEach(button => {
 
             button.onclick =
-                () => {
+                async () => {
 
-                    selectedDetector =
-                        button.dataset.detector;
-
-
-                    renderDetectorTabs();
-
-                    renderDetectorTable();
-
-                    renderSelectedDetector();
+                    await selectDetector(
+                        button.dataset.detector
+                    );
                 };
         });
 }
@@ -361,17 +382,11 @@ function renderDetectorTable() {
         .forEach(row => {
 
             row.onclick =
-                () => {
+                async () => {
 
-                    selectedDetector =
-                        row.dataset.detector;
-
-
-                    renderDetectorTabs();
-
-                    renderDetectorTable();
-
-                    renderSelectedDetector();
+                    await selectDetector(
+                        row.dataset.detector
+                    );
                 };
         });
 }
@@ -602,8 +617,408 @@ function renderSelectedDetector() {
             `+${gap.toFixed(3)}`;
 
     } else {
+
         gapElement.textContent =
             "—";
+    }
+}
+
+
+/* ============================================================
+   Ground-Truth Segments
+============================================================ */
+
+function buildGroundTruthShapes(
+    labels
+) {
+    const shapes = [];
+
+    let start = null;
+
+
+    for (
+        let i = 0;
+        i < labels.length;
+        i++
+    ) {
+
+        if (
+            labels[i] === 1 &&
+            start === null
+        ) {
+            start = i;
+        }
+
+
+        const segmentEnded =
+            labels[i] === 0 &&
+            start !== null;
+
+
+        if (segmentEnded) {
+
+            shapes.push({
+                type: "rect",
+
+                xref: "x",
+
+                yref: "paper",
+
+                x0: start,
+
+                x1: i - 1,
+
+                y0: 0,
+
+                y1: 1,
+
+                fillcolor:
+                    "rgba(244, 63, 94, 0.08)",
+
+                line: {
+                    width: 0,
+                },
+
+                layer: "below",
+            });
+
+
+            start = null;
+        }
+    }
+
+
+    if (start !== null) {
+
+        shapes.push({
+            type: "rect",
+
+            xref: "x",
+
+            yref: "paper",
+
+            x0: start,
+
+            x1:
+                labels.length - 1,
+
+            y0: 0,
+
+            y1: 1,
+
+            fillcolor:
+                "rgba(244, 63, 94, 0.08)",
+
+            line: {
+                width: 0,
+            },
+
+            layer: "below",
+        });
+    }
+
+
+    return shapes;
+}
+
+
+/* ============================================================
+   Evaluation Chart
+============================================================ */
+
+async function renderEvaluationChart() {
+    const chart =
+        document.getElementById(
+            "evaluation-chart"
+        );
+
+
+    const status =
+        document.getElementById(
+            "evaluation-chart-status"
+        );
+
+
+    const title =
+        document.getElementById(
+            "evaluation-chart-title"
+        );
+
+
+    if (
+        !chart ||
+        !selectedDetector
+    ) {
+        return;
+    }
+
+
+    title.textContent =
+        `${detectorLabel(selectedDetector)} · evaluation replay`;
+
+
+    status.textContent =
+        "Loading evaluation trace…";
+
+
+    try {
+
+        const trace =
+            await getEvaluationTrace(
+                machineId,
+                selectedDetector
+            );
+
+
+        const scores =
+            trace.scores;
+
+
+        const labels =
+            trace.labels;
+
+
+        const threshold =
+            Number(
+                trace.threshold
+            );
+
+
+        const timesteps =
+            scores.map(
+                (_, i) => i
+            );
+
+
+        const alertX = [];
+
+        const alertY = [];
+
+
+        for (
+            let i = 0;
+            i < scores.length;
+            i++
+        ) {
+
+            if (
+                Number.isFinite(
+                    scores[i]
+                ) &&
+                scores[i] >= threshold
+            ) {
+
+                alertX.push(i);
+
+                alertY.push(
+                    scores[i]
+                );
+            }
+        }
+
+
+        const groundTruthShapes =
+            buildGroundTruthShapes(
+                labels
+            );
+
+
+        /*
+         * Add the calibrated threshold on top of
+         * the ground-truth region shapes.
+         */
+
+        const shapes = [
+            ...groundTruthShapes,
+
+            {
+                type: "line",
+
+                xref: "paper",
+
+                x0: 0,
+
+                x1: 1,
+
+                yref: "y",
+
+                y0: threshold,
+
+                y1: threshold,
+
+                line: {
+                    color: "#64748b",
+                    width: 1.2,
+                    dash: "dot",
+                },
+            },
+        ];
+
+
+        const scoreTrace = {
+            type: "scattergl",
+
+            mode: "lines",
+
+            x: timesteps,
+
+            y: scores,
+
+            name: "Score",
+
+            line: {
+                color: "#22d3ee",
+
+                width: 1.2,
+            },
+
+            hovertemplate:
+                "t=%{x}<br>" +
+                "score=%{y:.6g}" +
+                "<extra></extra>",
+        };
+
+
+        const alertTrace = {
+            type: "scattergl",
+
+            mode: "markers",
+
+            x: alertX,
+
+            y: alertY,
+
+            name: "Predicted alert",
+
+            marker: {
+                color: "#f43f5e",
+
+                size: 4,
+            },
+
+            hovertemplate:
+                "ALERT<br>" +
+                "t=%{x}<br>" +
+                "score=%{y:.6g}" +
+                "<extra></extra>",
+        };
+
+
+        const layout = {
+
+            paper_bgcolor:
+                "rgba(0,0,0,0)",
+
+            plot_bgcolor:
+                "rgba(0,0,0,0)",
+
+
+            font: {
+                family: "Inter",
+
+                color: "#8b93a7",
+
+                size: 10,
+            },
+
+
+            margin: {
+                l: 64,
+
+                r: 20,
+
+                t: 20,
+
+                b: 50,
+            },
+
+
+            xaxis: {
+
+                title: {
+                    text: "timestep",
+
+                    font: {
+                        size: 10,
+
+                        color: "#5f6676",
+                    },
+                },
+
+                gridcolor: "#151820",
+
+                zeroline: false,
+
+                rangeslider: {
+                    visible: false,
+                },
+            },
+
+
+            yaxis: {
+
+                title: {
+                    text:
+                        "raw anomaly score",
+
+                    font: {
+                        size: 10,
+
+                        color: "#5f6676",
+                    },
+                },
+
+                gridcolor: "#151820",
+
+                zeroline: false,
+
+                autorange: true,
+            },
+
+
+            shapes,
+
+            showlegend: false,
+
+            hovermode:
+                "closest",
+        };
+
+
+        await Plotly.react(
+            chart,
+
+            [
+                scoreTrace,
+                alertTrace,
+            ],
+
+            layout,
+
+            {
+                displayModeBar: false,
+
+                responsive: true,
+            }
+        );
+
+
+        status.textContent =
+            `${trace.n_points.toLocaleString()} points · ` +
+            `threshold ${formatThreshold(threshold)}`;
+
+
+    } catch (error) {
+
+        status.textContent =
+            "Unable to load evaluation trace";
+
+
+        chart.innerHTML = `
+            <div class="evaluation-chart-error">
+                ${error.message}
+            </div>
+        `;
     }
 }
 
@@ -628,7 +1043,9 @@ function setLoading() {
 }
 
 
-function showEvaluationError(message) {
+function showEvaluationError(
+    message
+) {
     document.getElementById(
         "evaluation-table-body"
     ).innerHTML = `
@@ -668,6 +1085,7 @@ export async function initEvaluationView(
 
 
     try {
+
         results =
             await getResults(
                 machineId
@@ -679,6 +1097,7 @@ export async function initEvaluationView(
 
 
         if (!detectors.length) {
+
             showEvaluationError(
                 "No evaluation results are available for this machine."
             );
@@ -698,6 +1117,9 @@ export async function initEvaluationView(
         renderDetectorTable();
 
         renderSelectedDetector();
+
+
+        await renderEvaluationChart();
 
 
     } catch (error) {

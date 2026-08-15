@@ -141,3 +141,12 @@ export function openSessionStream(
         `/api/sessions/${encodeURIComponent(sessionId)}/stream?delay=0.02`
     );
 }
+
+export async function getEvaluationTrace(
+    machineId,
+    detector
+) {
+    return requestJSON(
+        `/api/evaluation/${encodeURIComponent(machineId)}/${encodeURIComponent(detector)}`
+    );
+}

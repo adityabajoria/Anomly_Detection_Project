@@ -1,1135 +1,732 @@
 <!doctype html>
-
 <html lang="en">
-
-<head>
-
-    <meta charset="utf-8">
-
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1"
-    >
-
-    <title>Sentinel</title>
-
-
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
-        rel="stylesheet"
-    >
-
-
-    <link
-        rel="stylesheet"
-        href="/static/styles.css"
-    >
-
-
-    <script
-        src="https://cdn.plot.ly/plotly-2.35.2.min.js"
-    ></script>
-
-</head>
-
-
-<body>
-
-<div class="app">
-
-
-    <!-- =====================================================
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+  <title>
+   Sentinel
+  </title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+  <link href="/static/styles.css" rel="stylesheet"/>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js">
+  </script>
+ </head>
+ <body>
+  <div class="app">
+   <!-- =====================================================
          Sidebar
     ====================================================== -->
+   <aside class="sidebar">
+    <div>
+     <div class="brand">
+      Sentinel
+      <span>
+       .
+      </span>
+     </div>
+     <p class="brand-subtitle">
+      streaming ML inference
+     </p>
+     <div class="sidebar-field">
+      <label for="machine-select">
+       Machine
+      </label>
+      <select id="machine-select">
+      </select>
+     </div>
+     <div class="sidebar-field">
+      <label for="model-select">
+       Active Detector
+      </label>
+      <select id="model-select">
+      </select>
+     </div>
+     <div class="sidebar-data">
+      <p class="sidebar-section-label">
+       DATA
+      </p>
+      <strong>
+       Server Machine Dataset (SMD)
+      </strong>
+      <span>
+       28 machines · 38 telemetry signals
+      </span>
+     </div>
+     <div class="sidebar-pipeline">
+      <p class="sidebar-section-label">HOW SENTINEL WORKS</p>
 
-    <aside class="sidebar">
+      <div class="pipeline-step">
+       <strong>Telemetry</strong>
+       <p>Machine signals arrive continuously.</p>
+      </div>
+      <div class="pipeline-arrow">↓</div>
 
-        <div>
+      <div class="pipeline-step">
+       <strong>Detector</strong>
+       <p>The active detector scores each timestep.</p>
+      </div>
+      <div class="pipeline-arrow">↓</div>
 
-            <div class="brand">
-                Sentinel<span>.</span>
-            </div>
+      <div class="pipeline-step">
+       <strong>Decision</strong>
+       <p>The score is evaluated against its threshold.</p>
+      </div>
+      <div class="pipeline-arrow">↓</div>
 
+      <div class="pipeline-step">
+       <strong>Observability</strong>
+       <p>Alerts and inference behavior are surfaced live.</p>
+      </div>
+     </div>
+    </div>
 
-            <p class="brand-subtitle">
-                streaming ML inference
-            </p>
-
-
-            <div class="sidebar-field">
-
-                <label for="machine-select">
-                    Machine
-                </label>
-
-                <select
-                    id="machine-select"
-                ></select>
-
-            </div>
-
-
-            <div class="sidebar-field">
-
-                <label for="model-select">
-                    Active Model
-                </label>
-
-                <select
-                    id="model-select"
-                ></select>
-
-            </div>
-
-        </div>
-
-
-        <div class="sidebar-footer">
-
-            <div class="sidebar-system-row">
-
-                <span
-                    class="system-indicator"
-                ></span>
-
-                <span>
-                    Inference service online
-                </span>
-
-            </div>
-
-
-            <p>
-                Persistent telemetry is routed through
-                dynamically selected anomaly detectors
-                and streamed to the observability client
-                over Server-Sent Events.
-            </p>
-
-        </div>
-
-    </aside>
-
-
-    <!-- =====================================================
+    <div class="sidebar-footer">
+     <div class="sidebar-system-row">
+      <span class="system-indicator">
+      </span>
+      <span>
+       Inference service online
+      </span>
+     </div>
+    </div>
+   </aside>
+   <!-- =====================================================
          Main
     ====================================================== -->
-
-    <main class="main">
-
-
-        <!-- Tabs -->
-
-        <nav class="top-tabs">
-
-            <button
-                class="top-tab active"
-                data-view="live"
-            >
-                Live Inference
-            </button>
-
-
-            <button
-                class="top-tab"
-                data-view="evaluation"
-            >
-                Model Diagnostics
-            </button>
-
-        </nav>
-
-
-        <div
-            id="error-banner"
-        ></div>
-
-
-        <!-- =================================================
+   <main class="main">
+    <!-- =====================================================
+             Project Overview
+        ====================================================== -->
+    <section class="project-hero">
+     <div class="hero-glow hero-glow-one">
+     </div>
+     <div class="hero-glow hero-glow-two">
+     </div>
+     <div class="project-hero-content">
+      <p class="hero-eyebrow">
+       REAL-TIME ML MONITORING
+      </p>
+      <h1>
+       Sentinel
+      </h1>
+      <p class="hero-description">
+       Modern servers generate continuous, high-dimensional telemetry
+                    that is difficult to inspect manually as behavior changes over
+                    time. Sentinel continuously scores incoming server data and
+                    surfaces unusual behavior as it emerges, while preserving the
+                    context needed to compare detector behavior, thresholds, and
+                    performance before and during operation.
+      </p>
+      <div class="hero-dataset">
+       Demonstrated on the
+       <strong>
+        Server Machine Dataset (SMD)
+       </strong>
+       <span>
+        ·
+       </span>
+       28 machines
+       <span>
+        ·
+       </span>
+       38 telemetry signals
+      </div>
+      <div class="hero-capability-grid">
+       <div class="hero-capability">
+        <span>
+         CONTINUOUS
+        </span>
+        <strong>
+         Processes server telemetry as it arrives
+        </strong>
+       </div>
+       <div class="hero-capability">
+        <span>
+         DETECTION
+        </span>
+        <strong>
+         Surfaces unusual server behavior in real time
+        </strong>
+       </div>
+       <div class="hero-capability">
+        <span>
+         ADAPTIVE
+        </span>
+        <strong>
+         Switches detectors without stopping the stream
+        </strong>
+       </div>
+       <div class="hero-capability">
+        <span>
+         DIAGNOSTIC
+        </span>
+        <strong>
+         Compares detector behavior, thresholds, and performance
+        </strong>
+       </div>
+      </div>
+     </div>
+    </section>
+    <!-- Tabs -->
+    <nav class="top-tabs">
+     <button class="top-tab active" data-view="live">
+      Live Inference
+     </button>
+     <button class="top-tab" data-view="evaluation">
+      Detector Diagnostics
+     </button>
+    </nav>
+    <div id="error-banner">
+    </div>
+    <!-- =================================================
              LIVE INFERENCE
         ================================================== -->
-
-        <section id="live-view">
-
-
-            <header class="page-header">
-
-                <div>
-
-                    <p class="eyebrow">
-                        INFERENCE MONITOR
-                    </p>
-
-
-                    <h1>
-                        Telemetry Stream
-                    </h1>
-
-
-                    <p class="header-description">
-                        Persistent online scoring with
-                        dynamically routed anomaly detectors.
-                    </p>
-
-                </div>
-
-
-                <div
-                    class="stream-badge"
-                    id="stream-badge"
-                >
-
-                    <span
-                        class="stream-dot"
-                    ></span>
-
-                    <span id="live-label">
-                        Idle
-                    </span>
-
-                </div>
-
-            </header>
-
-
-            <!-- KPIs -->
-
-            <section class="metrics">
-
-
-                <article class="metric-card">
-
-                    <div class="metric-header">
-                        Stream Status
-                    </div>
-
-                    <div
-                        class="metric-value status-value"
-                        id="k-stream"
-                    >
-                        IDLE
-                    </div>
-
-                    <div class="metric-footer">
-                        SSE connection
-                    </div>
-
-                </article>
-
-
-                <article class="metric-card">
-
-                    <div class="metric-header">
-                        Events Processed
-                    </div>
-
-                    <div
-                        class="metric-value"
-                        id="k-events"
-                    >
-                        0
-                    </div>
-
-                    <div class="metric-footer">
-                        Current session
-                    </div>
-
-                </article>
-
-
-                <article class="metric-card">
-
-                    <div class="metric-header">
-                        P95 Inference Latency
-                    </div>
-
-                    <div
-                        class="metric-value"
-                        id="k-latency"
-                    >
-                        —
-                    </div>
-
-                    <div class="metric-footer">
-                        Last 100 inferences
-                    </div>
-
-                </article>
-
-
-                <article class="metric-card">
-
-                    <div class="metric-header">
-                        Alerts
-                    </div>
-
-                    <div
-                        class="metric-value alert-value"
-                        id="k-alerts"
-                    >
-                        0
-                    </div>
-
-                    <div class="metric-footer">
-                        Threshold crossings
-                    </div>
-
-                </article>
-
-            </section>
-
-
-            <!-- Live Graph -->
-
-            <section class="panel chart-panel">
-
-                <div class="panel-header">
-
-                    <div>
-
-                        <p class="panel-eyebrow">
-                            LIVE INFERENCE
-                        </p>
-
-                        <h2 id="chart-title">
-                            Live inference
-                        </h2>
-
-                        <p class="panel-description">
-                            Scores are normalized against each model's
+    <section id="live-view">
+     <header class="page-header">
+      <div>
+       <p class="eyebrow">
+        INFERENCE MONITOR
+       </p>
+       <h1>
+        Telemetry Stream
+       </h1>
+       <p class="header-description">
+        Persistent online scoring with dynamically routed detectors.
+       </p>
+      </div>
+      <div class="stream-badge" id="stream-badge">
+       <span class="stream-dot">
+       </span>
+       <span id="live-label">
+        Idle
+       </span>
+      </div>
+     </header>
+     <!-- KPIs -->
+     <section class="metrics">
+      <article class="metric-card">
+       <div class="metric-header">
+        Stream Status
+       </div>
+       <div class="metric-value status-value" id="k-stream">
+        IDLE
+       </div>
+       <div class="metric-footer">
+        SSE connection
+       </div>
+      </article>
+      <article class="metric-card">
+       <div class="metric-header">
+        Events Processed
+       </div>
+       <div class="metric-value" id="k-events">
+        0
+       </div>
+       <div class="metric-footer">
+        Current session
+       </div>
+      </article>
+      <article class="metric-card">
+       <div class="metric-header">
+        P95 Inference Latency
+       </div>
+       <div class="metric-value" id="k-latency">
+        —
+       </div>
+       <div class="metric-footer">
+        Last 100 inferences
+       </div>
+      </article>
+      <article class="metric-card">
+       <div class="metric-header">
+        Alerts
+       </div>
+       <div class="metric-value alert-value" id="k-alerts">
+        0
+       </div>
+       <div class="metric-footer">
+        Threshold crossings
+       </div>
+      </article>
+     </section>
+     <!-- Live Graph -->
+     <section class="panel chart-panel">
+      <div class="panel-header">
+       <div>
+        <p class="panel-eyebrow">
+         LIVE INFERENCE
+        </p>
+        <h2 id="chart-title">
+         Live inference
+        </h2>
+        <p class="panel-description">
+         Scores are normalized against each detector's
                             calibrated threshold so multiple detectors
                             can share one continuous timeline.
-                        </p>
-
-                    </div>
-
-
-                    <div class="chart-actions">
-
-                        <button
-                            class="action-button primary"
-                            id="play-btn"
-                            title="Start / pause stream"
-                        >
-                            ▶
-                        </button>
-
-
-                        <button
-                            class="action-button"
-                            id="restart-btn"
-                            title="Restart telemetry session"
-                        >
-                            ↻
-                        </button>
-
-                    </div>
-
-                </div>
-
-
-                <div class="chart-container">
-
-                    <div id="chart"></div>
-
-                </div>
-
-
-                <div class="chart-footer">
-
-                    <div class="legend">
-
-                        <span class="legend-item">
-
-                            <span
-                                class="legend-line score"
-                            ></span>
-
-                            normalized score
-
-                        </span>
-
-
-                        <span class="legend-item">
-
-                            <span
-                                class="legend-dot alert"
-                            ></span>
-
-                            alert
-
-                        </span>
-
-
-                        <span class="legend-item">
-
-                            <span
-                                class="legend-line threshold"
-                            ></span>
-
-                            decision boundary = 1.0
-
-                        </span>
-
-                    </div>
-
-
-                    <span
-                        class="chart-status"
-                        id="chart-status"
-                    >
-                        Waiting for stream
-                    </span>
-
-                </div>
-
-            </section>
-
-
-            <!-- Lower Panels -->
-
-            <section class="monitor-grid">
-
-
-                <!-- Event Log -->
-
-                <article class="panel monitor-panel">
-
-                    <div class="panel-header compact">
-
-                        <div>
-
-                            <p class="panel-eyebrow">
-                                EVENT LOG
-                            </p>
-
-                            <h2>
-                                Recent Inference Events
-                            </h2>
-
-                        </div>
-
-
-                        <span
-                            class="event-count"
-                            id="event-count"
-                        >
-                            0 events
-                        </span>
-
-                    </div>
-
-
-                    <div class="event-table-header">
-
-                        <span>
-                            Timestep
-                        </span>
-
-                        <span>
-                            Score
-                        </span>
-
-                        <span>
-                            Model
-                        </span>
-
-                        <span>
-                            Status
-                        </span>
-
-                    </div>
-
-
-                    <div
-                        class="event-list"
-                        id="event-list"
-                    >
-
-                        <div class="empty-state">
-                            Inference events will appear here
+        </p>
+       </div>
+       <div class="chart-actions">
+        <button class="action-button primary" id="play-btn" title="Start / pause stream">
+         ▶
+        </button>
+        <button class="action-button" id="restart-btn" title="Restart telemetry session">
+         ↻
+        </button>
+       </div>
+      </div>
+      <div class="chart-container">
+       <div id="chart">
+       </div>
+      </div>
+      <div class="chart-footer">
+       <div class="legend">
+        <span class="legend-item">
+         <span class="legend-line score">
+         </span>
+         normalized score
+        </span>
+        <span class="legend-item">
+         <span class="legend-dot alert">
+         </span>
+         alert
+        </span>
+        <span class="legend-item">
+         <span class="legend-line threshold">
+         </span>
+         decision boundary = 1.0
+        </span>
+       </div>
+       <span class="chart-status" id="chart-status">
+        Waiting for stream
+       </span>
+      </div>
+     </section>
+     <!-- Lower Panels -->
+     <section class="monitor-grid">
+      <!-- Event Log -->
+      <article class="panel monitor-panel">
+       <div class="panel-header compact">
+        <div>
+         <p class="panel-eyebrow">
+          EVENT LOG
+         </p>
+         <h2>
+          Recent Inference Events
+         </h2>
+        </div>
+        <span class="event-count" id="event-count">
+         0 events
+        </span>
+       </div>
+       <div class="event-table-header">
+        <span>
+         Timestep
+        </span>
+        <span>
+         Score
+        </span>
+        <span>
+         Detector
+        </span>
+        <span>
+         Status
+        </span>
+       </div>
+       <div class="event-list" id="event-list">
+        <div class="empty-state">
+         Inference events will appear here
                             when the stream starts.
-                        </div>
-
-                    </div>
-
-                </article>
-
-
-                <!-- Service Panel -->
-
-                <article class="panel monitor-panel">
-
-                    <div class="panel-header compact">
-
-                        <div>
-
-                            <p class="panel-eyebrow">
-                                SERVICE
-                            </p>
-
-                            <h2>
-                                Inference Service
-                            </h2>
-
-                        </div>
-
-
-                        <span class="service-health">
-
-                            <span></span>
-
-                            Healthy
-
-                        </span>
-
-                    </div>
-
-
-                    <div class="service-list">
-
-
-                        <div class="service-row">
-
-                            <span class="service-label">
-                                Machine
-                            </span>
-
-                            <span
-                                class="service-value"
-                                id="service-machine"
-                            >
-                                —
-                            </span>
-
-                        </div>
-
-
-                        <div class="service-row">
-
-                            <span class="service-label">
-                                Active model
-                            </span>
-
-                            <span
-                                class="service-value"
-                                id="service-model"
-                            >
-                                —
-                            </span>
-
-                        </div>
-
-
-                        <div class="service-row">
-
-                            <span class="service-label">
-                                Model status
-                            </span>
-
-                            <span class="service-value positive">
-                                Loaded
-                            </span>
-
-                        </div>
-
-
-                        <div class="service-row">
-
-                            <span class="service-label">
-                                Stream
-                            </span>
-
-                            <span
-                                class="service-value"
-                                id="service-stream"
-                            >
-                                Disconnected
-                            </span>
-
-                        </div>
-
-
-                        <div class="service-row">
-
-                            <span class="service-label">
-                                Threshold policy
-                            </span>
-
-                            <span
-                                class="service-value"
-                                id="service-threshold-policy"
-                            >
-                                —
-                            </span>
-
-                        </div>
-
-
-                        <div class="service-row">
-
-                            <span class="service-label">
-                                Active threshold
-                            </span>
-
-                            <span
-                                class="service-value mono"
-                                id="service-threshold"
-                            >
-                                —
-                            </span>
-
-                        </div>
-
-
-                        <div class="service-row">
-
-                            <span class="service-label">
-                                P95 latency
-                            </span>
-
-                            <span
-                                class="service-value mono"
-                                id="service-p95"
-                            >
-                                —
-                            </span>
-
-                        </div>
-
-
-                        <div class="service-row">
-
-                            <span class="service-label">
-                                Transport
-                            </span>
-
-                            <span class="service-value">
-                                Server-Sent Events
-                            </span>
-
-                        </div>
-
-
-                        <details class="advanced-settings">
-
-                            <summary>
-                                Advanced threshold override
-                            </summary>
-
-
-                            <div class="threshold-control">
-
-                                <input
-                                    id="threshold-input"
-                                    type="number"
-                                    step="any"
-                                    placeholder="Enter override"
-                                >
-
-
-                                <button
-                                    id="threshold-apply"
-                                    class="small-button"
-                                >
-                                    Apply
-                                </button>
-
-
-                                <button
-                                    id="threshold-reset"
-                                    class="
-                                        small-button
-                                        secondary
-                                    "
-                                >
-                                    Reset
-                                </button>
-
-                            </div>
-
-
-                            <p class="advanced-help">
-                                Sentinel automatically uses each detector's
+        </div>
+       </div>
+      </article>
+      <!-- Service Panel -->
+      <article class="panel monitor-panel">
+       <div class="panel-header compact">
+        <div>
+         <p class="panel-eyebrow">
+          SERVICE
+         </p>
+         <h2>
+          Inference Service
+         </h2>
+        </div>
+        <span class="service-health">
+         <span>
+         </span>
+         Healthy
+        </span>
+       </div>
+       <div class="service-list">
+        <div class="service-row">
+         <span class="service-label">
+          Machine
+         </span>
+         <span class="service-value" id="service-machine">
+          —
+         </span>
+        </div>
+        <div class="service-row">
+         <span class="service-label">
+          Active detector
+         </span>
+         <span class="service-value" id="service-model">
+          —
+         </span>
+        </div>
+        <div class="service-row">
+         <span class="service-label">
+          Detector status
+         </span>
+         <span class="service-value positive">
+          Loaded
+         </span>
+        </div>
+        <div class="service-row">
+         <span class="service-label">
+          Stream
+         </span>
+         <span class="service-value" id="service-stream">
+          Disconnected
+         </span>
+        </div>
+        <div class="service-row">
+         <span class="service-label">
+          Threshold policy
+         </span>
+         <span class="service-value" id="service-threshold-policy">
+          —
+         </span>
+        </div>
+        <div class="service-row">
+         <span class="service-label">
+          Active threshold
+         </span>
+         <span class="service-value mono" id="service-threshold">
+          —
+         </span>
+        </div>
+        <div class="service-row">
+         <span class="service-label">
+          P95 latency
+         </span>
+         <span class="service-value mono" id="service-p95">
+          —
+         </span>
+        </div>
+        <div class="service-row">
+         <span class="service-label">
+          Transport
+         </span>
+         <span class="service-value">
+          Server-Sent Events
+         </span>
+        </div>
+        <details class="advanced-settings">
+         <summary>
+          Advanced threshold override
+         </summary>
+         <div class="threshold-control">
+          <input id="threshold-input" placeholder="Enter override" step="any" type="number"/>
+          <button class="small-button" id="threshold-apply">
+           Apply
+          </button>
+          <button class="small-button secondary" id="threshold-reset">
+           Reset
+          </button>
+         </div>
+         <p class="advanced-help">
+          Sentinel automatically uses each detector's
                                 calibrated threshold. Override only for testing.
-                            </p>
-
-                        </details>
-
-                    </div>
-
-                </article>
-
-            </section>
-
-        </section>
-
-
-        <!-- =================================================
-             MODEL DIAGNOSTICS
+         </p>
+        </details>
+       </div>
+      </article>
+     </section>
+    </section>
+    <!-- =================================================
+             DETECTOR DIAGNOSTICS
         ================================================== -->
-
-        <section
-            id="evaluation-view"
-            class="hidden"
-        >
-
-
-            <header class="evaluation-header">
-
-                <div>
-
-                    <p class="eyebrow">
-                        MODEL REGISTRY
-                    </p>
-
-
-                    <h1>
-                        Model Diagnostics
-                    </h1>
-
-
-                    <p class="header-description">
-                        Validation quality and serving characteristics
-                        for detector artifacts available to Sentinel.
-                    </p>
-
-                </div>
-
-
-                <div class="evaluation-machine-badge">
-
-                    <span>
-                        MACHINE
-                    </span>
-
-                    <strong
-                        id="evaluation-machine"
-                    >
-                        —
-                    </strong>
-
-                </div>
-
-            </header>
-
-
-            <div
-                class="evaluation-detectors"
-                id="evaluation-detectors"
-            ></div>
-
-
-            <!-- Registry Table -->
-
-            <section class="panel evaluation-summary">
-
-                <div class="panel-header">
-
-                    <div>
-
-                        <p class="panel-eyebrow">
-                            DEPLOYABLE ARTIFACTS
-                        </p>
-
-
-                        <h2>
-                            Detector Registry
-                        </h2>
-
-
-                        <p class="panel-description">
-                            Offline validation metrics, calibrated
-                            thresholds and scoring throughput for
-                            deployable models.
-                        </p>
-
-                    </div>
-
-                </div>
-
-
-                <div class="evaluation-table-wrap">
-
-                    <table class="evaluation-table">
-
-                        <thead>
-
-                        <tr>
-
-                            <th>
-                                Detector
-                            </th>
-
-                            <th class="numeric">
-                                Precision
-                            </th>
-
-                            <th class="numeric">
-                                Recall
-                            </th>
-
-                            <th class="numeric">
-                                Honest F1
-                            </th>
-
-                            <th class="numeric">
-                                PR-AUC
-                            </th>
-
-                            <th class="numeric">
-                                Threshold
-                            </th>
-
-                            <th class="numeric">
-                                Offline Throughput
-                            </th>
-
-                            <th>
-                                Artifact
-                            </th>
-
-                        </tr>
-
-                        </thead>
-
-
-                        <tbody
-                            id="evaluation-table-body"
-                        ></tbody>
-
-                    </table>
-
-                </div>
-
-            </section>
-
-
-            <!-- Selected Artifact -->
-
-            <section class="evaluation-detail-grid">
-
-
-                <article
-                    class="
-                        panel
-                        evaluation-detail-panel
-                    "
-                >
-
-                    <p class="panel-eyebrow">
-                        SELECTED ARTIFACT
-                    </p>
-
-
-                    <h2
-                        id="evaluation-selected-name"
-                    >
-                        —
-                    </h2>
-
-
-                    <div class="diagnostic-list">
-
-
-                        <div class="diagnostic-row">
-
-                            <span>
-                                Deployment status
-                            </span>
-
-                            <strong
-                                class="positive"
-                                id="diag-status"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="diagnostic-row">
-
-                            <span>
-                                Calibrated threshold
-                            </span>
-
-                            <strong
-                                class="mono"
-                                id="diag-threshold"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="diagnostic-row">
-
-                            <span>
-                                Honest F1
-                            </span>
-
-                            <strong
-                                class="mono"
-                                id="diag-f1"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="diagnostic-row">
-
-                            <span>
-                                Precision
-                            </span>
-
-                            <strong
-                                class="mono"
-                                id="diag-precision"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="diagnostic-row">
-
-                            <span>
-                                Recall
-                            </span>
-
-                            <strong
-                                class="mono"
-                                id="diag-recall"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="diagnostic-row">
-
-                            <span>
-                                PR-AUC
-                            </span>
-
-                            <strong
-                                class="mono"
-                                id="diag-pr-auc"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="diagnostic-row">
-
-                            <span>
-                                Mean detection delay
-                            </span>
-
-                            <strong
-                                class="mono"
-                                id="diag-delay"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="diagnostic-row">
-
-                            <span>
-                                Segments detected
-                            </span>
-
-                            <strong
-                                class="mono"
-                                id="diag-segments"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-                </article>
-
-
-                <!-- Serving Characteristics -->
-
-                <article
-                    class="
-                        panel
-                        evaluation-detail-panel
-                    "
-                >
-
-                    <p class="panel-eyebrow">
-                        SERVING CHARACTERISTICS
-                    </p>
-
-
-                    <h2>
-                        Artifact Performance
-                    </h2>
-
-
-                    <p class="panel-description">
-                        Offline model execution characteristics
-                        recorded during detector evaluation.
-                    </p>
-
-
-                    <div class="serving-stat-grid">
-
-
-                        <div class="serving-stat">
-
-                            <span>
-                                Fit time
-                            </span>
-
-                            <strong
-                                id="diag-fit-time"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div class="serving-stat">
-
-                            <span>
-                                Score time
-                            </span>
-
-                            <strong
-                                id="diag-score-time"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div
-                            class="
-                                serving-stat
-                                serving-stat-wide
-                            "
-                        >
-
-                            <span>
-                                Offline throughput
-                            </span>
-
-                            <strong
-                                id="diag-throughput"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="point-adjustment-block">
-
-
-                        <div>
-
-                            <span>
-                                Point-adjusted F1
-                            </span>
-
-                            <strong
-                                id="diag-adjusted-f1"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-
-                        <div>
-
-                            <span>
-                                Adjustment gap
-                            </span>
-
-                            <strong
-                                class="warning"
-                                id="diag-adjustment-gap"
-                            >
-                                —
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <p class="diagnostic-note">
-                        Point-adjusted scoring is retained as a
-                        diagnostic only and is not surfaced as a
-                        live serving metric.
-                    </p>
-
-                </article>
-
-            </section>
-
-
-            <!-- Phase 3B placeholder -->
-
-            <section
-                class="
-                    panel
-                    evaluation-chart-placeholder
-                "
-            >
-
-                <p class="panel-eyebrow">
-                    OFFLINE SCORE DIAGNOSTIC
-                </p>
-
-
-                <h2>
-                    Score vs Ground Truth
-                </h2>
-
-
-                <p>
-                    The selected detector's offline score trace,
-                    calibrated threshold and labeled anomaly regions
-                    will be connected in the next step.
-                </p>
-
-            </section>
-
-        </section>
-
-    </main>
-
-</div>
-
-
-<script
-    type="module"
-    src="/static/app.js"
-></script>
-
-</body>
-
+    <section class="hidden" id="evaluation-view">
+     <!-- =====================================================
+         Header
+    ====================================================== -->
+     <header class="evaluation-header">
+      <div>
+       <p class="eyebrow">
+        DETECTOR REGISTRY
+       </p>
+       <h1>
+        Detector Diagnostics
+       </h1>
+       <p class="header-description">
+        Compare detector quality, operating thresholds,
+                execution cost, and behavior on labeled telemetry.
+       </p>
+      </div>
+      <div class="evaluation-machine-badge">
+       <span>
+        MACHINE
+       </span>
+       <strong id="evaluation-machine">
+        —
+       </strong>
+      </div>
+     </header>
+     <!-- =====================================================
+         Detector Selector
+    ====================================================== -->
+     <div class="evaluation-detectors" id="evaluation-detectors">
+     </div>
+     <!-- =====================================================
+         1. Detector Comparison
+    ====================================================== -->
+     <section class="panel evaluation-summary evaluation-comparison">
+      <div class="panel-header">
+       <div>
+        <p class="panel-eyebrow">
+         DEPLOYABLE ARTIFACTS
+        </p>
+        <h2>
+         Detector Comparison
+        </h2>
+        <p class="panel-description">
+         Compare validation quality, calibrated
+                    thresholds, and offline execution throughput
+                    across all deployable detectors.
+        </p>
+       </div>
+      </div>
+      <div class="evaluation-table-wrap">
+       <table class="evaluation-table">
+        <thead>
+         <tr>
+          <th>
+           Detector
+          </th>
+          <th class="numeric">
+           Precision
+          </th>
+          <th class="numeric">
+           Recall
+          </th>
+          <th class="numeric">
+           Honest F1
+          </th>
+          <th class="numeric">
+           PR-AUC
+          </th>
+          <th class="numeric">
+           Threshold
+          </th>
+          <th class="numeric">
+           Offline Throughput
+          </th>
+          <th>
+           Artifact
+          </th>
+         </tr>
+        </thead>
+        <tbody id="evaluation-table-body">
+        </tbody>
+       </table>
+      </div>
+     </section>
+     <!-- =====================================================
+         2. Offline Detection Trace
+    ====================================================== -->
+     <section class="panel evaluation-chart-panel">
+      <div class="panel-header">
+       <div>
+        <p class="panel-eyebrow">
+         OFFLINE DETECTION TRACE
+        </p>
+        <h2 id="evaluation-chart-title">
+         Evaluation replay
+        </h2>
+        <p class="panel-description">
+         Raw detector scores are replayed against the
+                    calibrated operating threshold and labeled
+                    anomaly regions from the offline evaluation set.
+        </p>
+       </div>
+      </div>
+      <div class="evaluation-chart-container">
+       <div id="evaluation-chart">
+       </div>
+      </div>
+      <div class="evaluation-chart-footer">
+       <div class="legend">
+        <span class="legend-item">
+         <span class="legend-line score">
+         </span>
+         anomaly score
+        </span>
+        <span class="legend-item">
+         <span class="legend-dot alert">
+         </span>
+         predicted alert
+        </span>
+        <span class="legend-item">
+         <span class="legend-line threshold">
+         </span>
+         calibrated threshold
+        </span>
+        <span class="legend-item">
+         <span class="legend-band ground-truth">
+         </span>
+         true anomaly
+        </span>
+       </div>
+       <span class="chart-status" id="evaluation-chart-status">
+        Waiting for evaluation trace
+       </span>
+      </div>
+     </section>
+     <!-- =====================================================
+         3. Detector Performance
+    ====================================================== -->
+     <article class="panel evaluation-detail-panel evaluation-full-panel">
+      <p class="panel-eyebrow">
+       DETECTOR PERFORMANCE
+      </p>
+      <h2 id="evaluation-selected-name">
+       —
+      </h2>
+      <div class="diagnostic-list">
+       <div class="diagnostic-row">
+        <span>
+         Deployment status
+        </span>
+        <strong class="positive" id="diag-status">
+         —
+        </strong>
+       </div>
+       <div class="diagnostic-row">
+        <span>
+         Calibrated threshold
+        </span>
+        <strong class="mono" id="diag-threshold">
+         —
+        </strong>
+       </div>
+       <div class="diagnostic-row">
+        <span>
+         Honest F1
+        </span>
+        <strong class="mono" id="diag-f1">
+         —
+        </strong>
+       </div>
+       <div class="diagnostic-row">
+        <span>
+         Precision
+        </span>
+        <strong class="mono" id="diag-precision">
+         —
+        </strong>
+       </div>
+       <div class="diagnostic-row">
+        <span>
+         Recall
+        </span>
+        <strong class="mono" id="diag-recall">
+         —
+        </strong>
+       </div>
+       <div class="diagnostic-row">
+        <span>
+         PR-AUC
+        </span>
+        <strong class="mono" id="diag-pr-auc">
+         —
+        </strong>
+       </div>
+       <div class="diagnostic-row">
+        <span>
+         Mean detection delay
+        </span>
+        <strong class="mono" id="diag-delay">
+         —
+        </strong>
+       </div>
+       <div class="diagnostic-row">
+        <span>
+         Segments detected
+        </span>
+        <strong class="mono" id="diag-segments">
+         —
+        </strong>
+       </div>
+      </div>
+     </article>
+     <!-- =====================================================
+         4. Serving Characteristics
+    ====================================================== -->
+     <article class="panel evaluation-detail-panel evaluation-full-panel">
+      <p class="panel-eyebrow">
+       SERVING CHARACTERISTICS
+      </p>
+      <h2>
+       Artifact Performance
+      </h2>
+      <p class="panel-description">
+       Offline execution characteristics recorded
+            during detector evaluation.
+      </p>
+      <div class="serving-stat-grid">
+       <div class="serving-stat">
+        <span>
+         Fit time
+        </span>
+        <strong id="diag-fit-time">
+         —
+        </strong>
+       </div>
+       <div class="serving-stat">
+        <span>
+         Score time
+        </span>
+        <strong id="diag-score-time">
+         —
+        </strong>
+       </div>
+       <div class="serving-stat serving-stat-wide">
+        <span>
+         Offline throughput
+        </span>
+        <strong id="diag-throughput">
+         —
+        </strong>
+       </div>
+      </div>
+      <div class="point-adjustment-block">
+       <div>
+        <span>
+         Point-adjusted F1
+        </span>
+        <strong id="diag-adjusted-f1">
+         —
+        </strong>
+       </div>
+       <div>
+        <span>
+         Adjustment gap
+        </span>
+        <strong class="warning" id="diag-adjustment-gap">
+         —
+        </strong>
+       </div>
+      </div>
+      <p class="diagnostic-note">
+       Point-adjusted scoring is retained as a
+            diagnostic only and is not surfaced as a
+            live serving metric.
+      </p>
+     </article>
+    </section>
+   </main>
+  </div>
+  <script src="/static/app.js" type="module">
+  </script>
+ </body>
 </html>
